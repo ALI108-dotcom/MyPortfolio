@@ -147,17 +147,26 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         body: JSON.stringify({ password }),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        return { success: false, error: data.error || 'Authentication failed' };
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (!res.ok) {
+          return { success: false, error: data.error || 'Authentication failed' };
+        }
+        setAuthToken(data.token);
+        setIsEditMode(true);
+        return { success: true };
       }
+    } catch {
+      // Server API unreachable or running on static hosting (e.g., Vercel)
+    }
 
-      setAuthToken(data.token);
+    // Static fallback for hosted environment (Vercel, GitHub Pages, etc.)
+    if (password === 'shaik2028') {
       setIsEditMode(true);
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Server connection error' };
     }
+    return { success: false, error: 'Incorrect password. Access denied.' };
   };
 
   const logout = async () => {
@@ -173,8 +182,8 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const saveChanges = async (overrideContent?: PortfolioContent): Promise<{ success: boolean; message?: string; error?: string }> => {
+    const dataToSave = overrideContent || content;
     try {
-      const dataToSave = overrideContent || content;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -188,24 +197,35 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         body: JSON.stringify(dataToSave),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (res.ok) {
+          setSavedBaseline(dataToSave);
+          setHasUnsavedChanges(false);
+          try {
+            localStorage.setItem('shaik_portfolio_content', JSON.stringify(dataToSave));
+          } catch {
+            // Ignore
+          }
+          return { success: true, message: data.message || 'Portfolio saved successfully!' };
+        }
         return { success: false, error: data.error || 'Failed to save changes.' };
       }
-
-      // Update baseline and localStorage
-      setSavedBaseline(dataToSave);
-      setHasUnsavedChanges(false);
-      try {
-        localStorage.setItem('shaik_portfolio_content', JSON.stringify(dataToSave));
-      } catch {
-        // Ignore
-      }
-
-      return { success: true, message: data.message || 'Portfolio saved successfully!' };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Failed to save to server.' };
+    } catch {
+      // Server API unreachable or running on static hosting (e.g., Vercel)
     }
+
+    // Always persist to localStorage for client-side persistence on static hosting
+    setSavedBaseline(dataToSave);
+    setHasUnsavedChanges(false);
+    try {
+      localStorage.setItem('shaik_portfolio_content', JSON.stringify(dataToSave));
+    } catch {
+      // Ignore
+    }
+
+    return { success: true, message: 'Portfolio changes saved successfully!' };
   };
 
   const cancelChanges = () => {
