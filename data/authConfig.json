@@ -1,0 +1,7 @@
+{
+  "salt": "b8e36becad24421ec7bac0fcd9c79ad9",
+  "hash": "374587539d335c30c28fcb9c3064c41e022bc9aa7895319e04983c193983a8f7bf85592fe55b9f51f31d3a3abc5526be834262b9e1492eaddb415cd8faeea904",
+  "iterations": 100000,
+  "algorithm": "sha512",
+  "updatedAt": "2026-10-11T09:07:50.724Z"
+}

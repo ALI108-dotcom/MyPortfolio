@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700;1,900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fafbfe;
+  --foreground: #141432;
+  --card: #ffffff;
+  --card-foreground: #141432;
+  --primary: #ff9f43;
+  --primary-foreground: #fafafa;
+  --secondary: #092c4c;
+  --secondary-foreground: #ffffff;
+  --muted: #f5f5f5;
+  --muted-foreground: #6c7893;
+  --border: #e2e8f0;
+  --azure: #3676d1;
+  --malachite: #03c03c;
+  --neon-green: #42de5c;
+  --happy-orange: #ffae41;
+  --coral: #ff8439;
+  --sand: #fff4e5;
+  --saffron: var(--happy-orange);
+  --india-green: var(--malachite);
+  --chakra: var(--azure);
+
+  /* Exact Gradients from reference */
+  --gradient-tiranga: linear-gradient(90deg, #ffae41 0%, #ffae41 33.33%, #ffffff 33.33%, #ffffff 66.66%, #03c03c 66.66%, #03c03c 100%);
+  --gradient-paper: linear-gradient(180deg, #fafbfe 0%, #fff4e5 100%);
+  --gradient-sunrise: linear-gradient(135deg, #ffae41 0%, #ff8439 100%);
+  --gradient-verdant: linear-gradient(135deg, #42de5c 0%, #03c03c 100%);
+  --gradient-azure: linear-gradient(135deg, #3676d1 0%, #174ea6 100%);
+  --gradient-ink: linear-gradient(140deg, #141432 0%, #1e2640 55%, #092c4c 100%);
+  --gradient-surface: linear-gradient(150deg, #ffffff 0%, #fdfbf7 100%);
+  --gradient-tricolour: linear-gradient(90deg, #ffae41 0%, #ff8439 35%, #03c03c 70%, #3676d1 100%);
+  --gradient-paper-soft: linear-gradient(160deg, #fafbfe 0%, #f8faff 60%, #fff7ee 100%);
+  --gradient-headline: linear-gradient(100deg, #141432 0%, #2962c4 48%, #03a834 95%);
+}
+
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.font-display {
+  font-family: 'Archivo Black', 'Nunito', sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+/* Reference visual identities */
+.tiranga-rule {
+  background: var(--gradient-tiranga);
+  width: 100%;
+  height: 3px;
+}
+
+.civic-grid {
+  background-image: 
+    linear-gradient(to right, rgba(54, 118, 209, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(54, 118, 209, 0.08) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.print-dots {
+  background-image: radial-gradient(circle, rgba(20, 20, 50, 0.15) 1px, transparent 1.5px);
+  background-size: 9px 9px;
+}
+
+.brand-glow {
+  background-image: 
+    radial-gradient(60% 70% at 12% 0%, rgba(255, 174, 65, 0.22) 0%, transparent 70%),
+    radial-gradient(55% 65% at 92% 12%, rgba(54, 118, 209, 0.2) 0%, transparent 72%),
+    radial-gradient(70% 80% at 50% 110%, rgba(3, 192, 60, 0.18) 0%, transparent 75%);
+}
+
+.grand-shadow {
+  box-shadow: 0 1px 0 rgba(20, 20, 50, 0.08), 0 18px 40px -28px rgba(54, 118, 209, 0.45), 0 36px 80px -60px rgba(20, 20, 50, 0.45);
+}
+
+.grand-shadow-lg {
+  box-shadow: 0 2px 0 rgba(20, 20, 50, 0.1), 0 28px 60px -34px rgba(54, 118, 209, 0.5), 0 60px 120px -70px rgba(20, 20, 50, 0.55);
+}
+
+.lift-on-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s, background-color 0.2s, border-color 0.2s;
+}
+
+.lift-on-hover:hover {
+  transform: translateY(-4px);
+}
+
+.eyebrow {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--azure);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.grad-rule {
+  background-image: var(--gradient-tricolour);
+}
+
+.grad-ink {
+  background-image: var(--gradient-ink);
+  color: #fafbfe;
+}
+
+.grad-surface {
+  background-image: var(--gradient-surface);
+}
+
+.grad-sunrise {
+  background-image: var(--gradient-sunrise);
+  color: #141432;
+}
+
+.grad-verdant {
+  background-image: var(--gradient-verdant);
+  color: #141432;
+}
+
+.grad-azure {
+  background-image: var(--gradient-azure);
+  color: #ffffff;
+}
+
+.grad-headline {
+  background-image: var(--gradient-headline);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.grad-paper-soft {
+  background-image: var(--gradient-paper-soft);
+}
+
+@keyframes editorialRise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.editorial-rise {
+  animation: editorialRise 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes documentaryDrift {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.04) translate(-1%, -1%);
+  }
+}
+
+.documentary-drift {
+  animation: documentaryDrift 16s ease-in-out infinite alternate;
+}
