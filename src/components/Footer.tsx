@@ -37,7 +37,7 @@ export const Footer: React.FC = () => {
             </div>
           </div>
           <p className="mt-3 max-w-sm text-xs sm:text-sm text-white/75 leading-relaxed">
-            {profile.degreeFull} · {profile.institution}. Dedicated to turning data into meaningful insights through Python, SQL, Power BI, and Machine Learning.
+            {profile.degreeFull}. Dedicated to continuous learning, building practical projects, and mastering modern technologies.
           </p>
           <p className="mt-4 text-[11px] text-white/50">
             Graduation Batch: {profile.graduationBatch}

@@ -41,7 +41,7 @@ export const Skills: React.FC = () => {
         <div className="min-w-0">
           <p className="eyebrow tracking-[0.2em] text-azure">TECHNICAL COMPETENCIES</p>
           <h2 className="mt-3 font-display text-3xl uppercase leading-none sm:text-5xl lg:text-6xl text-foreground">
-            CORE DATA SCIENCE<br />SKILLS &amp; TOOLS
+            WHAT I KNOW<br />SKILLS &amp; TOOLS
           </h2>
           <div className="grad-rule mt-5 h-2 w-28 rounded-full sm:w-36" aria-hidden="true" />
         </div>

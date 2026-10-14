@@ -63,7 +63,7 @@ export const Contact: React.FC = () => {
           </h2>
           <div className="grad-rule mt-6 h-2.5 w-32 rounded-full sm:w-40" aria-hidden="true" />
           <p className="mt-6 text-sm sm:text-base text-muted-foreground max-w-2xl">
-            Interested in discussing Data Science internships, academic collaborations, or project walkthroughs? Reach out directly through the verified channels below.
+            Interested in discussing technical projects, learning collaborations, or project walkthroughs? Reach out directly through the verified channels below.
           </p>
         </div>
 

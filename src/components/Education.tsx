@@ -32,9 +32,9 @@ export const Education: React.FC = () => {
     {
       id: 'default-4',
       num: '04',
-      title: `TARGET CAREER MILESTONE: ${(profile.targetRole || 'Data Scientist').toUpperCase()}`,
-      subtitle: 'Securing an opportunity at a leading technology enterprise',
-      period: `GRADUATION ${profile.graduationBatch}`,
+      title: 'CONTINUOUS LEARNING & PRACTICAL BUILDING',
+      subtitle: 'Expanding technical capabilities and mastering modern development & data technologies',
+      period: 'ACTIVE JOURNEY',
     },
   ];
 

@@ -3,9 +3,9 @@ import React from 'react';
 export const StatsBar: React.FC = () => {
   const stats = [
     { label: 'DEGREE SPECIALIZATION', value: 'B.TECH AI & DS', colorClass: 'text-azure' },
-    { label: 'CORE DATA STACK', value: 'PYTHON & SQL', colorClass: 'text-malachite' },
-    { label: 'BUSINESS ANALYTICS', value: 'POWER BI & DAX', colorClass: 'text-coral' },
-    { label: 'CAREER TARGET', value: 'DATA SCIENTIST', colorClass: 'text-happy-orange' },
+    { label: 'CORE SKILLS KNOWN', value: 'PYTHON & SQL', colorClass: 'text-malachite' },
+    { label: 'PROJECTS & ANALYTICS', value: 'POWER BI & EDA', colorClass: 'text-coral' },
+    { label: 'PORTFOLIO FOCUS', value: 'WHAT I KNOW & DID', colorClass: 'text-happy-orange' },
   ];
 
   return (

@@ -14,23 +14,23 @@ import {
 
 export const personalProfile: PersonalProfile = {
   name: 'Shaik Ali Ahammad',
-  roleTitle: 'Aspiring Data Scientist',
+  roleTitle: 'What I Know & What I Did',
   degreeShort: 'B.Tech AI & Data Science',
   degreeFull: 'B.Tech in Artificial Intelligence and Data Science',
-  institution: 'Muthayammal Engineering College, Rasipuram',
-  location: 'Rasipuram, Tamil Nadu, India',
+  institution: '',
+  location: '',
   graduationBatch: '2028',
-  careerGoal: 'Become a skilled Data Scientist and secure an opportunity at a leading technology company.',
-  targetRole: 'Data Scientist',
-  bioHeadline: 'Aspiring Data Scientist | AI & Data Science Student',
-  bioSummary: 'I am an Artificial Intelligence and Data Science student passionate about turning data into meaningful insights through Python, SQL, Power BI, and Machine Learning.',
-  aboutParagraph: 'I am a student specializing in Artificial Intelligence and Data Science at Muthayammal Engineering College. I focus on developing practical competence across Python data science libraries, relational database queries in SQL, Power BI analytics dashboards, and predictive modeling fundamentals.',
+  careerGoal: 'Continuously learn, build impactful projects, and master modern technologies.',
+  targetRole: 'Technology Learner & Builder',
+  bioHeadline: 'What I Know Till Now & What I Have Built',
+  bioSummary: 'Welcome to my portfolio! Here I document everything I know, the projects I have built, and the skills I am continuously learning. As I learn new technologies and build new work, I keep updating it right here.',
+  aboutParagraph: 'I am a student passionate about technology, programming, and building real-world projects. This portfolio is a living showcase of what I know till now and what I have built. From Python and database queries to interactive dashboards and prototypes, I continuously update this space whenever I learn something new or complete a project.',
   githubUsername: 'ALI108-dotcom',
   githubUrl: 'https://github.com/ALI108-dotcom',
   emailConfigurable: 'SHAIKALIBHAI9895@GMAIL.COM',
   linkedinConfigurable: 'https://www.linkedin.com/in/shaik-ali-ahammad-b6b38b321/',
   introVideoUrl: 'https://www.youtube.com/watch?v=xC-c7E5PK0Y', // Sample 3-minute introduction video (3-13 min range)
-  introVideoTitle: 'Introduction to Data Science & Analytical Journey',
+  introVideoTitle: 'Introduction & Technical Learning Journey',
   introVideoDuration: '3 min',
 };
 
@@ -226,9 +226,9 @@ export const experienceData: ExperienceItem[] = [
 export const educationData: EducationItem = {
   degree: 'Bachelor of Technology (B.Tech)',
   specialization: 'Artificial Intelligence and Data Science',
-  institution: 'Muthayammal Engineering College',
-  location: 'Rasipuram, Namakkal District, Tamil Nadu, India',
-  batch: 'Graduation Batch: 2028',
+  institution: 'Undergraduate Program',
+  location: 'Tamil Nadu, India',
+  batch: 'Batch of 2028',
   status: 'Currently Pursuing (Undergraduate Student)',
   keyCoursework: [
     'Python Programming & Problem Solving',
@@ -243,14 +243,14 @@ export const educationData: EducationItem = {
 export const faqData: FaqItem[] = [
   {
     id: 'faq-1',
-    question: 'What is Shaik Ali Ahammad’s primary academic background and career aspiration?',
-    answer: 'Shaik Ali Ahammad is an undergraduate student pursuing a B.Tech in Artificial Intelligence and Data Science at Muthayammal Engineering College, Rasipuram (Batch of 2028). His career goal is to become a skilled Data Scientist and secure an opportunity at a leading technology company.',
+    question: 'What is the focus of Shaik Ali Ahammad’s portfolio?',
+    answer: 'This portfolio serves as a live, evolving showcase of what Shaik knows till now and the hands-on projects he has built across Python, SQL, Power BI, and modern development. He continuously learns new technologies and keeps this portfolio updated.',
     category: 'Profile',
   },
   {
     id: 'faq-2',
-    question: 'What core technical stack and analytical tools does Shaik utilize?',
-    answer: 'His core skillset includes Python for data science and scripting, SQL for database querying and aggregation, MongoDB for NoSQL document modeling, Microsoft Power BI for executive dashboard building and DAX analytics, and Microsoft Excel for spreadsheet manipulation and pivot analysis.',
+    question: 'What core technical stack and analytical tools does Shaik know?',
+    answer: 'His skillset includes Python for data science and scripting, SQL for database querying and aggregation, MongoDB for NoSQL document modeling, Microsoft Power BI for dashboard building and DAX analytics, and Microsoft Excel for spreadsheet manipulation and pivot analysis.',
     category: 'Skills',
   },
   {
@@ -337,7 +337,7 @@ export const defaultEducationMilestones: EducationMilestone[] = [
     id: 'edu-m1',
     num: '01',
     title: 'B.TECH IN ARTIFICIAL INTELLIGENCE AND DATA SCIENCE',
-    subtitle: 'Muthayammal Engineering College, Rasipuram',
+    subtitle: 'Undergraduate Engineering Program',
     period: 'BATCH OF 2028',
     published: true,
   },
@@ -360,9 +360,9 @@ export const defaultEducationMilestones: EducationMilestone[] = [
   {
     id: 'edu-m4',
     num: '04',
-    title: 'TARGET CAREER MILESTONE: PROFESSIONAL DATA SCIENTIST',
-    subtitle: 'Securing an opportunity at a leading technology enterprise',
-    period: 'GRADUATION 2028',
+    title: 'CONTINUOUS LEARNING & PRACTICAL BUILDING',
+    subtitle: 'Expanding technical capabilities and mastering modern development & data technologies',
+    period: 'ACTIVE JOURNEY',
     published: true,
   },
 ];

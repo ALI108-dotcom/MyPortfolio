@@ -31,9 +31,9 @@ export const Projects: React.FC = () => {
         
         {/* Section Heading */}
         <div className="max-w-4xl">
-          <p className="eyebrow tracking-[0.2em] text-azure">VERIFIED WORK &amp; DELIVERABLES</p>
+          <p className="eyebrow tracking-[0.2em] text-azure">WHAT I DID TILL NOW</p>
           <h2 className="mt-3 font-display text-3xl uppercase leading-[0.95] sm:text-5xl text-foreground">
-            FEATURED PROJECTS &amp; DASHBOARDS
+            PROJECTS &amp; BUILDS
           </h2>
           <div className="grad-rule mt-6 h-2.5 w-32 rounded-full sm:w-40" aria-hidden="true" />
         </div>

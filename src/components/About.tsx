@@ -13,26 +13,26 @@ export const About: React.FC = () => {
   const pillars = [
     {
       num: '01',
-      title: 'ACADEMIC FOUNDATION IN AI & DS',
-      desc: `Currently pursuing ${profile.degreeShort} in Artificial Intelligence and Data Science at ${profile.institution}, ${profile.location} (Batch ${profile.graduationBatch}).`,
+      title: 'FOUNDATION IN AI & DATA SCIENCE',
+      desc: `Pursuing ${profile.degreeShort} (Batch ${profile.graduationBatch}), building a solid foundation in programming, analytical reasoning, and data problem-solving.`,
       borderClass: 'border-neon-green hover:border-malachite',
     },
     {
       num: '02',
-      title: 'ANALYTICAL RIGOR & EXPLORATION',
-      desc: 'Passionate about statistical analysis, data cleaning, outlier treatment, and extracting meaningful demographic patterns using Python.',
+      title: 'WHAT I KNOW TILL NOW',
+      desc: 'Hands-on competence in Python, SQL relational databases, exploratory data analysis, data wrangling, and interactive Power BI dashboards.',
       borderClass: 'border-happy-orange hover:border-coral',
     },
     {
       num: '03',
-      title: 'DATA STORYTELLING & POWER BI',
-      desc: 'Skilled in transforming raw tables into executive business intelligence dashboards, star schema models, and actionable KPI reports.',
+      title: 'WHAT I HAVE BUILT TILL NOW',
+      desc: 'Built practical projects including business intelligence dashboards, exploratory analysis on real-world datasets, and prototype tools.',
       borderClass: 'border-azure hover:border-foreground',
     },
     {
       num: '04',
-      title: 'CONTINUOUS PRACTICE & CODING',
-      desc: 'Dedicated to persistent practice, project documentation, code craftsmanship, and securing a position at a forward-looking technology company.',
+      title: 'CONTINUOUS LEARNING & UPDATING',
+      desc: 'Dedicated to persistent hands-on learning, building new work, and updating this portfolio with every new milestone achieved.',
       borderClass: 'border-coral hover:border-happy-orange',
     },
   ];
@@ -46,11 +46,11 @@ export const About: React.FC = () => {
         <div className="min-w-0">
           <p className="eyebrow tracking-[0.2em] text-azure">ABOUT MY JOURNEY</p>
           <h2 className="mt-3 font-display text-3xl uppercase leading-[0.92] sm:text-5xl lg:text-6xl text-foreground">
-            TURNING DATA<br />INTO INSIGHTS
+            WHAT I KNOW<br />&amp; WHAT I DID
           </h2>
           <div className="grad-rule mt-6 h-2.5 w-32 rounded-full sm:w-40" aria-hidden="true" />
           <p className="mt-7 max-w-md text-base sm:text-lg font-medium leading-relaxed text-muted-foreground">
-            {profile.aboutParagraph || `I am a student specializing in Artificial Intelligence and Data Science at ${profile.institution}. I focus on developing practical competence across Python data science libraries, relational database queries in SQL, Power BI analytics dashboards, and predictive modeling fundamentals.`}
+            {profile.aboutParagraph}
           </p>
         </div>
 
@@ -153,7 +153,7 @@ export const About: React.FC = () => {
 
           {/* Bottom Card Bar */}
           <div className="relative z-10 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-white/70">
-            <span>Career Goal: Professional Data Scientist</span>
+            <span>Focus: What I Know &amp; What I Have Built</span>
             <div className="flex items-center gap-2">
               {isEditMode && (
                 <span className="rounded bg-azure/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-azure border border-azure/30">

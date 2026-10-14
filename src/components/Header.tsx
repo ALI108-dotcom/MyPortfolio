@@ -47,7 +47,7 @@ export const Header: React.FC = () => {
               {personalProfile.name}
             </span>
             <span className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-azure whitespace-nowrap">
-              Aspiring Data Scientist
+              {personalProfile.roleTitle || 'What I Know & What I Did'}
             </span>
           </div>
         </a>

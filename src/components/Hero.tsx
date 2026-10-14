@@ -35,7 +35,7 @@ export const Hero: React.FC = () => {
         <div className="relative z-10 min-w-0 lg:col-span-7">
           <p className="mb-6 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-azure sm:text-xs">
             <span className="grad-rule h-2.5 w-10 rounded-full" aria-hidden="true" />
-            AI &amp; DATA SCIENCE SCHOLAR
+            WHAT I KNOW &amp; WHAT I DID TILL NOW
           </p>
 
           <h1 className="font-display text-[2.6rem] uppercase leading-[0.92] sm:text-6xl lg:text-7xl xl:text-[5.2rem]">
@@ -86,7 +86,7 @@ export const Hero: React.FC = () => {
           <div className="relative aspect-[4/3] overflow-hidden rounded-xl grand-shadow-lg sm:aspect-[3/4] lg:aspect-[4/5] bg-foreground border border-border/20 group">
             <img 
               src={profile.photoUrl || profilePhoto} 
-              alt={`${profile.name} — Aspiring Data Scientist`} 
+              alt={`${profile.name} — What I Know & What I Did`} 
               className="documentary-drift h-full w-full object-cover object-top"
               loading="eager"
             />
