@@ -9,9 +9,10 @@ import {
   LearningEntry,
   CertificationItem,
   AchievementItem,
-  EducationMilestone
+  EducationMilestone,
+  StatItem
 } from '../types';
-import { defaultPortfolioContent } from '../data/portfolioData';
+import { defaultPortfolioContent, defaultStatsBar } from '../data/portfolioData';
 
 interface PortfolioContextType {
   content: PortfolioContent;
@@ -26,6 +27,10 @@ interface PortfolioContextType {
   resetToDefaults: () => Promise<{ success: boolean; message?: string }>;
   exportData: () => void;
   importData: (imported: PortfolioContent) => void;
+
+  // Stats Bar CMS
+  updateStatsBar: (stats: StatItem[]) => void;
+  updateStatItem: (index: number, stat: Partial<StatItem>) => void;
 
   // Profile CMS
   updateProfile: (profile: Partial<PersonalProfile>) => void;
@@ -99,6 +104,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
               certifications: data.content.certifications || defaultPortfolioContent.certifications,
               achievements: data.content.achievements || defaultPortfolioContent.achievements,
               educationMilestones: data.content.educationMilestones || defaultPortfolioContent.educationMilestones,
+              statsBar: data.content.statsBar || defaultPortfolioContent.statsBar || defaultStatsBar,
             };
             setContent(merged);
             setSavedBaseline(merged);
@@ -121,6 +127,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
             certifications: parsed.certifications || defaultPortfolioContent.certifications,
             achievements: parsed.achievements || defaultPortfolioContent.achievements,
             educationMilestones: parsed.educationMilestones || defaultPortfolioContent.educationMilestones,
+            statsBar: parsed.statsBar || defaultPortfolioContent.statsBar || defaultStatsBar,
           };
           setContent(merged);
           setSavedBaseline(merged);
@@ -540,6 +547,27 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     }));
   };
 
+  // Stats Bar CMS
+  const updateStatsBar = (newStats: StatItem[]) => {
+    setContent((prev) => ({
+      ...prev,
+      statsBar: newStats,
+    }));
+  };
+
+  const updateStatItem = (index: number, updatedStat: Partial<StatItem>) => {
+    setContent((prev) => {
+      const currentStats = prev.statsBar ? [...prev.statsBar] : [...defaultStatsBar];
+      if (currentStats[index]) {
+        currentStats[index] = { ...currentStats[index], ...updatedStat };
+      }
+      return {
+        ...prev,
+        statsBar: currentStats,
+      };
+    });
+  };
+
   return (
     <PortfolioContext.Provider
       value={{
@@ -556,6 +584,10 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         exportData,
         importData,
         updateProfile,
+
+        // Stats Bar
+        updateStatsBar,
+        updateStatItem,
 
         // Skills
         addSkill,

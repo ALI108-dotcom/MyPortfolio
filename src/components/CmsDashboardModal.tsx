@@ -22,11 +22,13 @@ import {
   Layers, 
   Sparkles,
   Video,
-  Camera
+  Camera,
+  BarChart3
 } from 'lucide-react';
 import { parseVideoUrl } from '../utils/videoHelper';
 import { processImageFile } from '../utils/imageHelper';
 import profilePhoto from '../assets/profile.jpg';
+import { defaultStatsBar } from '../data/portfolioData';
 import { 
   SkillItem, 
   ProjectItem, 
@@ -34,7 +36,7 @@ import {
   CertificationItem, 
   AchievementItem, 
   ExperienceItem, 
-  EducationMilestone 
+  EducationMilestone
 } from '../types';
 
 interface CmsDashboardModalProps {
@@ -44,6 +46,7 @@ interface CmsDashboardModalProps {
 
 type TabType = 
   | 'overview' 
+  | 'statsbar'
   | 'skills' 
   | 'projects' 
   | 'learning' 
@@ -62,6 +65,8 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
     exportData,
     importData,
     updateProfile,
+    updateStatsBar,
+    updateStatItem,
     // Skills
     addSkill,
     updateSkill,
@@ -407,6 +412,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
 
               {[
                 { id: 'overview', label: 'Overview & Stats', icon: Sparkles, count: null },
+                { id: 'statsbar', label: 'Stats Highlights', icon: BarChart3, count: 4 },
                 { id: 'skills', label: 'Skills & Tools', icon: Code, count: skillsCount },
                 { id: 'projects', label: 'Featured Projects', icon: Layers, count: projectsCount },
                 { id: 'learning', label: 'Learning Journey', icon: BookOpen, count: learningCount },
@@ -468,7 +474,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
             
             {/* Mobile Category Tab Strip */}
             <div className="flex md:hidden overflow-x-auto gap-1 pb-3 mb-4 border-b border-border">
-              {(['overview', 'skills', 'projects', 'learning', 'certifications', 'achievements', 'experience', 'education', 'profile'] as TabType[]).map((tab) => (
+              {(['overview', 'statsbar', 'skills', 'projects', 'learning', 'certifications', 'achievements', 'experience', 'education', 'profile'] as TabType[]).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => {
@@ -1078,6 +1084,110 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                           <span className="font-display text-xs uppercase block text-foreground">Add Certificate</span>
                           <span className="text-[10px] text-muted-foreground">Course verification</span>
                         </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STATS BAR TAB */}
+                {activeTab === 'statsbar' && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
+                      <div>
+                        <h3 className="font-display text-xl uppercase tracking-wider text-foreground flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5 text-happy-orange" />
+                          Highlight Stats Cards (Portfolio at a Glance)
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Edit the 4 highlight metric cards displayed across the top of your portfolio.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => updateStatsBar(defaultStatsBar)}
+                        className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                      >
+                        Reset to Defaults
+                      </button>
+                    </div>
+
+                    {/* Cards Editor Grid */}
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {(content.statsBar && content.statsBar.length > 0 ? content.statsBar : defaultStatsBar).map((stat, idx) => (
+                        <div key={idx} className="rounded-xl border border-border bg-card p-4 sm:p-5 grand-shadow space-y-3">
+                          <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                            <span className="text-xs font-bold uppercase tracking-wider text-happy-orange">
+                              Card 0{idx + 1}
+                            </span>
+                            <span className={`text-xs font-bold uppercase ${stat.colorClass || 'text-azure'}`}>
+                              ● Accent
+                            </span>
+                          </div>
+
+                          {/* Label input */}
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                              Card Category Title
+                            </label>
+                            <input
+                              type="text"
+                              value={stat.label}
+                              onChange={(e) => updateStatItem(idx, { label: e.target.value })}
+                              placeholder="e.g. DEGREE SPECIALIZATION"
+                              className="w-full rounded-md border border-border bg-background px-3 py-2 text-xs font-bold uppercase text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure"
+                            />
+                          </div>
+
+                          {/* Value input */}
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                              Card Main Metric Value
+                            </label>
+                            <input
+                              type="text"
+                              value={stat.value}
+                              onChange={(e) => updateStatItem(idx, { value: e.target.value })}
+                              placeholder="e.g. B.TECH AI & DS"
+                              className="w-full rounded-md border border-border bg-background px-3 py-2 text-xs font-display uppercase text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure"
+                            />
+                          </div>
+
+                          {/* Color select */}
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                              Accent Color
+                            </label>
+                            <select
+                              value={stat.colorClass || 'text-azure'}
+                              onChange={(e) => updateStatItem(idx, { colorClass: e.target.value })}
+                              className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure"
+                            >
+                              <option value="text-azure">Azure Blue</option>
+                              <option value="text-malachite">Malachite Green</option>
+                              <option value="text-coral">Coral Red</option>
+                              <option value="text-happy-orange">Happy Orange</option>
+                            </select>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Live Preview */}
+                    <div className="rounded-xl border border-border bg-card p-5 grand-shadow">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                        Homepage Preview
+                      </h4>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-lg border border-border bg-border">
+                        {(content.statsBar && content.statsBar.length > 0 ? content.statsBar : defaultStatsBar).map((stat, i) => (
+                          <div key={i} className="p-4 bg-background">
+                            <span className={`text-[10px] font-bold uppercase tracking-wider block ${stat.colorClass || 'text-azure'}`}>
+                              {stat.label || 'LABEL'}
+                            </span>
+                            <span className="font-display text-base uppercase block text-foreground mt-1 truncate">
+                              {stat.value || 'VALUE'}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

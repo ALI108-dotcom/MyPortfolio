@@ -9,7 +9,8 @@ import {
   LearningEntry,
   CertificationItem,
   AchievementItem,
-  EducationMilestone
+  EducationMilestone,
+  StatItem
 } from '../types';
 
 export const personalProfile: PersonalProfile = {
@@ -367,6 +368,13 @@ export const defaultEducationMilestones: EducationMilestone[] = [
   },
 ];
 
+export const defaultStatsBar: StatItem[] = [
+  { id: 'stat-1', label: 'DEGREE SPECIALIZATION', value: 'B.TECH AI & DS', colorClass: 'text-azure' },
+  { id: 'stat-2', label: 'CORE SKILLS KNOWN', value: 'PYTHON & SQL', colorClass: 'text-malachite' },
+  { id: 'stat-3', label: 'PROJECTS & ANALYTICS', value: 'POWER BI & EDA', colorClass: 'text-coral' },
+  { id: 'stat-4', label: 'PORTFOLIO FOCUS', value: 'WHAT I KNOW & DID', colorClass: 'text-happy-orange' },
+];
+
 export const defaultPortfolioContent: PortfolioContent = {
   profile: personalProfile,
   skills: skillsData.map(s => ({ ...s, published: true })),
@@ -378,6 +386,7 @@ export const defaultPortfolioContent: PortfolioContent = {
   experience: experienceData.map(e => ({ ...e, published: true })),
   education: educationData,
   faq: faqData,
+  statsBar: defaultStatsBar,
 };
 
 

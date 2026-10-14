@@ -144,6 +144,13 @@ export interface PersonalProfile {
   photoUrl?: string;
 }
 
+export interface StatItem {
+  id?: string;
+  label: string;
+  value: string;
+  colorClass?: string;
+}
+
 export interface PortfolioContent {
   profile: PersonalProfile;
   skills: SkillItem[];
@@ -155,4 +162,5 @@ export interface PortfolioContent {
   experience: ExperienceItem[];
   education: EducationItem;
   faq: FaqItem[];
+  statsBar?: StatItem[];
 }

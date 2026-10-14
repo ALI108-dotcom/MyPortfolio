@@ -427,8 +427,8 @@
   "faq": [
     {
       "id": "faq-1",
-      "question": "What is Shaik Ali Ahammad’s primary academic background and career aspiration?",
-      "answer": "Shaik Ali Ahammad is an undergraduate student pursuing a B.Tech in Artificial Intelligence and Data Science at Muthayammal Engineering College, Rasipuram (Batch of 2028). His career goal is to become a skilled Data Scientist and secure an opportunity at a leading technology company.",
+      "question": "What is the focus of Shaik Ali Ahammad’s portfolio?",
+      "answer": "This portfolio serves as a live, evolving showcase of what Shaik knows till now and the hands-on projects he has built across Python, SQL, Power BI, and modern development. He continuously learns new technologies and keeps this portfolio updated.",
       "category": "Profile"
     },
     {
@@ -454,6 +454,32 @@
       "question": "How can recruiters or collaborators get in touch?",
       "answer": "You can explore his public repositories directly at https://github.com/ALI108-dotcom or send an inquiry via the verified contact form below. All direct messages receive a timely response.",
       "category": "Contact"
+    }
+  ],
+  "statsBar": [
+    {
+      "id": "stat-1",
+      "label": "DEGREE SPECIALIZATION",
+      "value": "B.TECH AI & DS",
+      "colorClass": "text-azure"
+    },
+    {
+      "id": "stat-2",
+      "label": "CORE SKILLS KNOWN",
+      "value": "PYTHON & SQL",
+      "colorClass": "text-malachite"
+    },
+    {
+      "id": "stat-3",
+      "label": "PROJECTS & ANALYTICS",
+      "value": "POWER BI & EDA",
+      "colorClass": "text-coral"
+    },
+    {
+      "id": "stat-4",
+      "label": "PORTFOLIO FOCUS",
+      "value": "WHAT I KNOW & DID",
+      "colorClass": "text-happy-orange"
     }
   ]
 }
