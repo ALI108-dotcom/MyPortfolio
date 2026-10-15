@@ -23,7 +23,9 @@ import {
   Sparkles,
   Video,
   Camera,
-  BarChart3
+  BarChart3,
+  Smartphone,
+  RefreshCw
 } from 'lucide-react';
 import { parseVideoUrl } from '../utils/videoHelper';
 import { processImageFile } from '../utils/imageHelper';
@@ -102,6 +104,8 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
     updateEducationMilestone,
     deleteEducationMilestone,
     toggleEducationMilestonePublish,
+    getSyncUrl,
+    forceSyncToLatestDefaults,
   } = usePortfolio();
 
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -116,13 +120,41 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
 
   if (!isOpen) return null;
 
+  const handleCopySyncUrl = () => {
+    try {
+      const url = getSyncUrl();
+      navigator.clipboard.writeText(url);
+      setSaveStatus({
+        type: 'success',
+        message: 'Mobile Sync Link copied! Open it in your mobile browser to instantly mirror this version.',
+      });
+      setTimeout(() => setSaveStatus(null), 5000);
+    } catch {
+      setSaveStatus({
+        type: 'error',
+        message: 'Could not copy link automatically. Please check browser permissions.',
+      });
+    }
+  };
+
+  const handleForceResetDefaults = () => {
+    if (window.confirm('Clear stale browser cache and synchronize with latest portfolio version?')) {
+      forceSyncToLatestDefaults();
+      setSaveStatus({
+        type: 'success',
+        message: 'Cache purged! Successfully reset to latest "What I Know & What I Did" defaults.',
+      });
+      setTimeout(() => setSaveStatus(null), 4000);
+    }
+  };
+
   const handleSaveToServer = async () => {
     setSaving(true);
     setSaveStatus(null);
     const res = await saveChanges();
     setSaving(false);
     if (res.success) {
-      setSaveStatus({ type: 'success', message: res.message || 'Changes safely persisted to server storage!' });
+      setSaveStatus({ type: 'success', message: res.message || 'Changes safely persisted to storage!' });
       setTimeout(() => setSaveStatus(null), 3500);
     } else {
       setSaveStatus({ type: 'error', message: res.error || 'Failed to save changes.' });
@@ -363,6 +395,22 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopySyncUrl}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-azure/40 bg-azure/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-azure hover:bg-azure/30 transition-all cursor-pointer"
+              title="Copy a shareable link that mirrors your updated portfolio instantly to your phone"
+            >
+              <Smartphone className="h-3.5 w-3.5" />
+              Sync to Phone
+            </button>
+            <button
+              onClick={handleForceResetDefaults}
+              className="hidden lg:inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white/80 hover:bg-white/20 transition-all cursor-pointer"
+              title="Purge stale browser cache and reset to latest version"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Reset Cache
+            </button>
             <button
               onClick={handleSaveToServer}
               disabled={saving}

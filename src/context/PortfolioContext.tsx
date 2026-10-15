@@ -22,6 +22,9 @@ interface PortfolioContextType {
   setIsEditMode: (val: boolean) => void;
   hasUnsavedChanges: boolean;
   authToken: string | null;
+  isCloudSynced: boolean;
+  getSyncUrl: () => string;
+  forceSyncToLatestDefaults: () => void;
   login: (password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   saveChanges: (overrideContent?: PortfolioContent) => Promise<{ success: boolean; message?: string; error?: string }>;
@@ -99,54 +102,111 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [isCloudSynced, setIsCloudSynced] = useState<boolean>(false);
 
-  // Load server-persisted content on initial mount
+  // Helper to sanitize & migrate legacy cached values
+  const sanitizeAndMerge = (source: Partial<PortfolioContent>): PortfolioContent => {
+    const merged: PortfolioContent = {
+      ...defaultPortfolioContent,
+      ...source,
+      profile: {
+        ...defaultPortfolioContent.profile,
+        ...(source.profile || {}),
+      },
+      skills: source.skills || defaultPortfolioContent.skills,
+      projects: source.projects || defaultPortfolioContent.projects,
+      experience: source.experience || defaultPortfolioContent.experience,
+      education: source.education || defaultPortfolioContent.education,
+      faq: source.faq || defaultPortfolioContent.faq,
+      learningJourney: source.learningJourney || defaultPortfolioContent.learningJourney,
+      certifications: source.certifications || defaultPortfolioContent.certifications,
+      achievements: source.achievements || defaultPortfolioContent.achievements,
+      educationMilestones: source.educationMilestones || defaultPortfolioContent.educationMilestones,
+      statsBar: source.statsBar || defaultPortfolioContent.statsBar || defaultStatsBar,
+      focusTracks: source.focusTracks || defaultPortfolioContent.focusTracks || defaultFocusTracks,
+      aboutPillars: source.aboutPillars || defaultPortfolioContent.aboutPillars || defaultAboutPillars,
+    };
+
+    // Auto-migrate old legacy placeholder texts if present
+    if (merged.profile.roleTitle === 'Aspiring Data Scientist') {
+      merged.profile.roleTitle = defaultPortfolioContent.profile.roleTitle;
+    }
+    if (
+      merged.profile.bioSummary &&
+      merged.profile.bioSummary.includes('Artificial Intelligence and Data Science student passionate about turning data')
+    ) {
+      merged.profile.bioSummary = defaultPortfolioContent.profile.bioSummary;
+      merged.profile.bioHeadline = defaultPortfolioContent.profile.bioHeadline;
+      merged.profile.aboutParagraph = defaultPortfolioContent.profile.aboutParagraph;
+    }
+
+    return merged;
+  };
+
+  // Load cloud or local persisted content on mount, and listen for URL hash sync
   useEffect(() => {
     async function loadInitialData() {
+      // 1. Check for URL sync hash (#sync=...)
+      if (typeof window !== 'undefined' && window.location.hash.includes('sync=')) {
+        try {
+          const match = window.location.hash.match(/sync=([^&]+)/);
+          if (match && match[1]) {
+            const raw = decodeURIComponent(atob(decodeURIComponent(match[1])));
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+              const synced = sanitizeAndMerge(parsed);
+              setContent(synced);
+              setSavedBaseline(synced);
+              try {
+                localStorage.setItem('shaik_portfolio_content', JSON.stringify(synced));
+                localStorage.setItem('shaik_portfolio_content_v2', JSON.stringify(synced));
+              } catch {}
+              // Clean hash without reload
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Could not decode URL sync hash', e);
+        }
+      }
+
+      // 2. Fetch server / Vercel KV content
       try {
         const res = await fetch('/api/content');
         if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.isCustom && data.content) {
-            // Merge with defaults to ensure all fields exist
-            const merged: PortfolioContent = {
-              ...defaultPortfolioContent,
-              ...data.content,
-              learningJourney: data.content.learningJourney || defaultPortfolioContent.learningJourney,
-              certifications: data.content.certifications || defaultPortfolioContent.certifications,
-              achievements: data.content.achievements || defaultPortfolioContent.achievements,
-              educationMilestones: data.content.educationMilestones || defaultPortfolioContent.educationMilestones,
-              statsBar: data.content.statsBar || defaultPortfolioContent.statsBar || defaultStatsBar,
-              focusTracks: data.content.focusTracks || defaultPortfolioContent.focusTracks || defaultFocusTracks,
-              aboutPillars: data.content.aboutPillars || defaultPortfolioContent.aboutPillars || defaultAboutPillars,
-            };
-            setContent(merged);
-            setSavedBaseline(merged);
-            return;
+          const contentType = res.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await res.json();
+            if (data.success && data.isCustom && data.content) {
+              const merged = sanitizeAndMerge(data.content);
+              setContent(merged);
+              setSavedBaseline(merged);
+              setIsCloudSynced(Boolean(data.isCloud));
+              try {
+                localStorage.setItem('shaik_portfolio_content', JSON.stringify(merged));
+                localStorage.setItem('shaik_portfolio_content_v2', JSON.stringify(merged));
+              } catch {}
+              return;
+            }
           }
         }
       } catch (err) {
         console.warn('Could not fetch server content, using local defaults', err);
       }
 
-      // Check localStorage fallback
+      // 3. Check localStorage fallback (with legacy auto-migration)
       try {
-        const local = localStorage.getItem('shaik_portfolio_content');
+        const local = localStorage.getItem('shaik_portfolio_content_v2') || localStorage.getItem('shaik_portfolio_content');
         if (local) {
           const parsed = JSON.parse(local);
-          const merged: PortfolioContent = {
-            ...defaultPortfolioContent,
-            ...parsed,
-            learningJourney: parsed.learningJourney || defaultPortfolioContent.learningJourney,
-            certifications: parsed.certifications || defaultPortfolioContent.certifications,
-            achievements: parsed.achievements || defaultPortfolioContent.achievements,
-            educationMilestones: parsed.educationMilestones || defaultPortfolioContent.educationMilestones,
-            statsBar: parsed.statsBar || defaultPortfolioContent.statsBar || defaultStatsBar,
-            focusTracks: parsed.focusTracks || defaultPortfolioContent.focusTracks || defaultFocusTracks,
-            aboutPillars: parsed.aboutPillars || defaultPortfolioContent.aboutPillars || defaultAboutPillars,
-          };
+          const merged = sanitizeAndMerge(parsed);
           setContent(merged);
           setSavedBaseline(merged);
+          try {
+            // Keep localStorage updated with sanitized data
+            localStorage.setItem('shaik_portfolio_content_v2', JSON.stringify(merged));
+          } catch {}
         }
       } catch (e) {
         // Fallback silently
@@ -181,7 +241,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         return { success: true };
       }
     } catch {
-      // Server API unreachable or running on static hosting (e.g., Vercel)
+      // Static fallback
     }
 
     // Static fallback for hosted environment (Vercel, GitHub Pages, etc.)
@@ -205,7 +265,9 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const saveChanges = async (overrideContent?: PortfolioContent): Promise<{ success: boolean; message?: string; error?: string }> => {
-    const dataToSave = overrideContent || content;
+    const dataToSave = sanitizeAndMerge(overrideContent || content);
+    let cloudSaved = false;
+
     try {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -214,41 +276,56 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         headers['Authorization'] = `Bearer ${authToken}`;
       }
 
-      const res = await fetch('/api/content/save', {
+      // Try /api/content first (supports Vercel KV), fallback to /api/content/save
+      let res = await fetch('/api/content', {
         method: 'POST',
         headers,
         body: JSON.stringify(dataToSave),
       });
 
+      if (!res.ok) {
+        res = await fetch('/api/content/save', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(dataToSave),
+        });
+      }
+
       const contentType = res.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await res.json();
-        if (res.ok) {
-          setSavedBaseline(dataToSave);
-          setHasUnsavedChanges(false);
-          try {
-            localStorage.setItem('shaik_portfolio_content', JSON.stringify(dataToSave));
-          } catch {
-            // Ignore
-          }
-          return { success: true, message: data.message || 'Portfolio saved successfully!' };
+        if (res.ok && data.success) {
+          cloudSaved = Boolean(data.isCloud);
+          setIsCloudSynced(cloudSaved);
         }
-        return { success: false, error: data.error || 'Failed to save changes.' };
       }
     } catch {
-      // Server API unreachable or running on static hosting (e.g., Vercel)
+      // Static fallback
     }
 
-    // Always persist to localStorage for client-side persistence on static hosting
+    // Always persist to localStorage
     setSavedBaseline(dataToSave);
+    setContent(dataToSave);
     setHasUnsavedChanges(false);
+
     try {
       localStorage.setItem('shaik_portfolio_content', JSON.stringify(dataToSave));
+      localStorage.setItem('shaik_portfolio_content_v2', JSON.stringify(dataToSave));
     } catch {
       // Ignore
     }
 
-    return { success: true, message: 'Portfolio changes saved successfully!' };
+    if (cloudSaved) {
+      return { 
+        success: true, 
+        message: 'Saved to Cloud Database! Mobile & laptop will automatically stay in sync.' 
+      };
+    }
+
+    return { 
+      success: true, 
+      message: 'Saved to browser storage! Use "Mobile Sync Link" to mirror instantly to your phone.' 
+    };
   };
 
   const cancelChanges = () => {
@@ -267,12 +344,35 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     setContent(defaultPortfolioContent);
     setSavedBaseline(defaultPortfolioContent);
     setHasUnsavedChanges(false);
+    setIsCloudSynced(false);
     try {
       localStorage.removeItem('shaik_portfolio_content');
+      localStorage.removeItem('shaik_portfolio_content_v2');
     } catch {
       // Ignore
     }
     return { success: true, message: 'Portfolio reset to default successfully.' };
+  };
+
+  const forceSyncToLatestDefaults = () => {
+    try {
+      localStorage.removeItem('shaik_portfolio_content');
+      localStorage.removeItem('shaik_portfolio_content_v2');
+    } catch {}
+    setContent(defaultPortfolioContent);
+    setSavedBaseline(defaultPortfolioContent);
+    setHasUnsavedChanges(false);
+  };
+
+  const getSyncUrl = (): string => {
+    try {
+      const json = JSON.stringify(content);
+      const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
+      const base = typeof window !== 'undefined' ? window.location.origin : 'https://my-portfolio-beta-nine-78.vercel.app';
+      return `${base}/#sync=${encoded}`;
+    } catch (e) {
+      return typeof window !== 'undefined' ? window.location.href : 'https://my-portfolio-beta-nine-78.vercel.app';
+    }
   };
 
   const exportData = () => {
@@ -650,6 +750,9 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         setIsEditMode,
         hasUnsavedChanges,
         authToken,
+        isCloudSynced,
+        getSyncUrl,
+        forceSyncToLatestDefaults,
         login,
         logout,
         saveChanges,
