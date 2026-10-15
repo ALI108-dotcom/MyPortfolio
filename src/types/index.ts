@@ -151,6 +151,25 @@ export interface StatItem {
   colorClass?: string;
 }
 
+export interface FocusTrack {
+  id: string;
+  trackLabel: string;
+  title: string;
+  description: string;
+  iconName?: string;
+  colorVariant?: 'azure' | 'verdant';
+  published?: boolean;
+}
+
+export interface AboutPillar {
+  id: string;
+  num: string;
+  title: string;
+  desc: string;
+  borderClass?: string;
+  published?: boolean;
+}
+
 export interface PortfolioContent {
   profile: PersonalProfile;
   skills: SkillItem[];
@@ -163,4 +182,6 @@ export interface PortfolioContent {
   education: EducationItem;
   faq: FaqItem[];
   statsBar?: StatItem[];
+  focusTracks?: FocusTrack[];
+  aboutPillars?: AboutPillar[];
 }

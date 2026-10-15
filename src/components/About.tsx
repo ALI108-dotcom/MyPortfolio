@@ -1,41 +1,213 @@
 import React, { useState } from 'react';
-import { Database, LineChart, Binary, Compass, Video } from 'lucide-react';
+import { Database, LineChart, Binary, Compass, Video, Edit2, Save, Plus, Trash2, X, CheckCircle } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { parseVideoUrl } from '../utils/videoHelper';
+import { AboutPillar } from '../types';
+import { defaultAboutPillars } from '../data/portfolioData';
+
+// Pillar border color options
+const pillarBorderOptions = [
+  { label: 'Green', value: 'border-neon-green hover:border-malachite' },
+  { label: 'Orange', value: 'border-happy-orange hover:border-coral' },
+  { label: 'Blue', value: 'border-azure hover:border-foreground' },
+  { label: 'Coral', value: 'border-coral hover:border-happy-orange' },
+  { label: 'Purple', value: 'border-purple-400 hover:border-purple-300' },
+];
+
+interface EditPillarModalProps {
+  pillar: AboutPillar;
+  onSave: (p: AboutPillar) => void;
+  onClose: () => void;
+  onDelete: () => void;
+}
+
+const EditPillarModal: React.FC<EditPillarModalProps> = ({ pillar, onSave, onClose, onDelete }) => {
+  const [form, setForm] = useState<AboutPillar>({ ...pillar });
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    onSave(form);
+    setSaved(true);
+    setTimeout(() => { setSaved(false); onClose(); }, 800);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border bg-secondary/50 px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-azure/20 border border-azure/30">
+              <Edit2 className="h-4 w-4 text-azure" />
+            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-azure">Edit Pillar</p>
+              <p className="text-[11px] text-muted-foreground">Card {form.num}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Number</label>
+              <input
+                value={form.num}
+                onChange={(e) => setForm({ ...form, num: e.target.value })}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure"
+                placeholder="01"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Color Accent</label>
+              <select
+                value={form.borderClass}
+                onChange={(e) => setForm({ ...form, borderClass: e.target.value })}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure"
+              >
+                {pillarBorderOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Title</label>
+            <input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure"
+              placeholder="e.g. FOUNDATION IN AI & DATA SCIENCE"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Description</label>
+            <textarea
+              rows={4}
+              value={form.desc}
+              onChange={(e) => setForm({ ...form, desc: e.target.value })}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure resize-none"
+              placeholder="Describe this pillar..."
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between border-t border-border bg-secondary/30 px-5 py-4">
+          <button
+            onClick={onDelete}
+            className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delete
+          </button>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-xs font-bold text-muted-foreground hover:bg-muted transition-all cursor-pointer">Cancel</button>
+            <button
+              onClick={handleSave}
+              className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white transition-all cursor-pointer ${saved ? 'bg-malachite' : 'bg-azure hover:bg-azure/80'}`}
+            >
+              {saved ? <><CheckCircle className="h-3.5 w-3.5" /> Saved!</> : <><Save className="h-3.5 w-3.5" /> Save Pillar</>}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface AddPillarModalProps {
+  onSave: (p: Omit<AboutPillar, 'id'> & { id?: string }) => void;
+  onClose: () => void;
+  nextNum: string;
+}
+
+const AddPillarModal: React.FC<AddPillarModalProps> = ({ onSave, onClose, nextNum }) => {
+  const [form, setForm] = useState<Omit<AboutPillar, 'id'>>({
+    num: nextNum,
+    title: '',
+    desc: '',
+    borderClass: 'border-azure hover:border-foreground',
+    published: true,
+  });
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    if (!form.title.trim()) return;
+    onSave(form);
+    setSaved(true);
+    setTimeout(() => { setSaved(false); onClose(); }, 800);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border bg-secondary/50 px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-malachite/20 border border-malachite/30">
+              <Plus className="h-4 w-4 text-malachite" />
+            </span>
+            <p className="text-xs font-bold uppercase tracking-widest text-malachite">Add New Pillar</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Number</label>
+              <input value={form.num} onChange={(e) => setForm({ ...form, num: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure" placeholder="05" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Color Accent</label>
+              <select value={form.borderClass} onChange={(e) => setForm({ ...form, borderClass: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure">
+                {pillarBorderOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Title</label>
+            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure" placeholder="e.g. NEW SKILL AREA" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Description</label>
+            <textarea rows={3} value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure resize-none" placeholder="Describe this pillar..." />
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-2 border-t border-border bg-secondary/30 px-5 py-4">
+          <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-xs font-bold text-muted-foreground hover:bg-muted transition-all cursor-pointer">Cancel</button>
+          <button onClick={handleSave} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white transition-all cursor-pointer ${saved ? 'bg-malachite' : 'bg-azure hover:bg-azure/80'}`}>
+            {saved ? <><CheckCircle className="h-3.5 w-3.5" /> Added!</> : <><Plus className="h-3.5 w-3.5" /> Add Pillar</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const About: React.FC = () => {
-  const { content, isEditMode } = usePortfolio();
+  const { content, isEditMode, updateAboutPillar, addAboutPillar, deleteAboutPillar, saveChanges } = usePortfolio();
   const profile = content.profile;
   const [activeMediaTab, setActiveMediaTab] = useState<'video' | 'philosophy'>('video');
+  const [editingPillar, setEditingPillar] = useState<AboutPillar | null>(null);
+  const [showAddPillar, setShowAddPillar] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const videoInfo = parseVideoUrl(profile.introVideoUrl);
 
-  const pillars = [
-    {
-      num: '01',
-      title: 'FOUNDATION IN AI & DATA SCIENCE',
-      desc: `Pursuing ${profile.degreeShort} (Batch ${profile.graduationBatch}), building a solid foundation in programming, analytical reasoning, and data problem-solving.`,
-      borderClass: 'border-neon-green hover:border-malachite',
-    },
-    {
-      num: '02',
-      title: 'WHAT I KNOW TILL NOW',
-      desc: 'Hands-on competence in Python, SQL relational databases, exploratory data analysis, data wrangling, and interactive Power BI dashboards.',
-      borderClass: 'border-happy-orange hover:border-coral',
-    },
-    {
-      num: '03',
-      title: 'WHAT I HAVE BUILT TILL NOW',
-      desc: 'Built practical projects including business intelligence dashboards, exploratory analysis on real-world datasets, and prototype tools.',
-      borderClass: 'border-azure hover:border-foreground',
-    },
-    {
-      num: '04',
-      title: 'CONTINUOUS LEARNING & UPDATING',
-      desc: 'Dedicated to persistent hands-on learning, building new work, and updating this portfolio with every new milestone achieved.',
-      borderClass: 'border-coral hover:border-happy-orange',
-    },
-  ];
+  const pillars = (content.aboutPillars && content.aboutPillars.length > 0
+    ? content.aboutPillars
+    : defaultAboutPillars
+  ).filter((p) => p.published !== false);
+
+  const handleSaveAll = async () => {
+    setSaving(true);
+    await saveChanges();
+    setSaving(false);
+  };
+
+  const nextPillarNum = String(pillars.length + 1).padStart(2, '0');
 
   return (
     <section id="about" className="scroll-mt-24">
@@ -170,25 +342,87 @@ export const About: React.FC = () => {
 
       </div>
 
-      {/* Bottom 4 numbered cards with colored top borders */}
-      <ol className="mt-10 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
-        {pillars.map((item) => (
-          <li
-            key={item.num}
-            className={`group relative min-w-0 border-t-4 bg-background p-5 transition-colors hover:bg-muted/55 sm:p-6 ${item.borderClass}`}
-          >
-            <span className="block font-display text-3xl leading-none text-muted-foreground/30">
-              {item.num}
+      {/* Bottom numbered pillars */}
+      <div className="mt-10 lg:mt-12">
+        {/* Edit mode pillar controls */}
+        {isEditMode && (
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-azure/20 bg-azure/5 px-4 py-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-azure flex items-center gap-1.5">
+              <Edit2 className="h-3.5 w-3.5" /> About Pillars — Edit Mode
             </span>
-            <h3 className="mt-3 font-display text-base uppercase leading-tight sm:text-lg text-foreground">
-              {item.title}
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-              {item.desc}
-            </p>
-          </li>
-        ))}
-      </ol>
+            <div className="ml-auto flex gap-2">
+              <button
+                onClick={() => setShowAddPillar(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-malachite/30 bg-malachite/10 px-3 py-1.5 text-xs font-bold text-malachite hover:bg-malachite/20 transition-all cursor-pointer"
+              >
+                <Plus className="h-3 w-3" /> Add Pillar
+              </button>
+              <button
+                onClick={handleSaveAll}
+                disabled={saving}
+                className="flex items-center gap-1.5 rounded-lg border border-azure/30 bg-azure/10 px-3 py-1.5 text-xs font-bold text-azure hover:bg-azure/20 transition-all cursor-pointer disabled:opacity-60"
+              >
+                {saving ? 'Saving...' : <><Save className="h-3 w-3" /> Save All</>}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <ol className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+          {pillars.map((item) => (
+            <li
+              key={item.id}
+              className={`group relative min-w-0 border-t-4 bg-background p-5 transition-colors hover:bg-muted/55 sm:p-6 ${item.borderClass || 'border-azure hover:border-foreground'}`}
+            >
+              {/* Edit button (edit mode only) */}
+              {isEditMode && (
+                <button
+                  onClick={() => setEditingPillar(item)}
+                  className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-md border border-azure/40 bg-azure/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-azure opacity-0 group-hover:opacity-100 transition-all hover:bg-azure/25 cursor-pointer"
+                >
+                  <Edit2 className="h-3 w-3" /> Edit
+                </button>
+              )}
+              <span className="block font-display text-3xl leading-none text-muted-foreground/30">
+                {item.num}
+              </span>
+              <h3 className="mt-3 font-display text-base uppercase leading-tight sm:text-lg text-foreground">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
+                {item.desc}
+              </p>
+            </li>
+          ))}
+
+          {/* Empty state for edit mode */}
+          {isEditMode && pillars.length === 0 && (
+            <li className="col-span-4 flex min-h-32 items-center justify-center text-center text-sm text-muted-foreground">
+              <div>
+                <p className="font-bold">No pillars defined</p>
+                <p className="text-xs mt-1">Click "Add Pillar" above to start</p>
+              </div>
+            </li>
+          )}
+        </ol>
+      </div>
+
+      {/* Modals */}
+      {editingPillar && (
+        <EditPillarModal
+          pillar={editingPillar}
+          onSave={(updated) => { updateAboutPillar(updated); setEditingPillar(null); }}
+          onClose={() => setEditingPillar(null)}
+          onDelete={() => { deleteAboutPillar(editingPillar.id); setEditingPillar(null); }}
+        />
+      )}
+      {showAddPillar && (
+        <AddPillarModal
+          nextNum={nextPillarNum}
+          onSave={(p) => { addAboutPillar(p); setShowAddPillar(false); }}
+          onClose={() => setShowAddPillar(false)}
+        />
+      )}
     </section>
   );
 };

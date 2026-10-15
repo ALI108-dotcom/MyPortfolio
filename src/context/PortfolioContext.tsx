@@ -10,9 +10,11 @@ import {
   CertificationItem,
   AchievementItem,
   EducationMilestone,
-  StatItem
+  StatItem,
+  FocusTrack,
+  AboutPillar
 } from '../types';
-import { defaultPortfolioContent, defaultStatsBar } from '../data/portfolioData';
+import { defaultPortfolioContent, defaultStatsBar, defaultFocusTracks, defaultAboutPillars } from '../data/portfolioData';
 
 interface PortfolioContextType {
   content: PortfolioContent;
@@ -31,6 +33,16 @@ interface PortfolioContextType {
   // Stats Bar CMS
   updateStatsBar: (stats: StatItem[]) => void;
   updateStatItem: (index: number, stat: Partial<StatItem>) => void;
+
+  // Focus Tracks CMS
+  updateFocusTrack: (track: FocusTrack) => void;
+  addFocusTrack: (track: Omit<FocusTrack, 'id'> & { id?: string }) => void;
+  deleteFocusTrack: (id: string) => void;
+
+  // About Pillars CMS
+  updateAboutPillar: (pillar: AboutPillar) => void;
+  addAboutPillar: (pillar: Omit<AboutPillar, 'id'> & { id?: string }) => void;
+  deleteAboutPillar: (id: string) => void;
 
   // Profile CMS
   updateProfile: (profile: Partial<PersonalProfile>) => void;
@@ -105,6 +117,8 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
               achievements: data.content.achievements || defaultPortfolioContent.achievements,
               educationMilestones: data.content.educationMilestones || defaultPortfolioContent.educationMilestones,
               statsBar: data.content.statsBar || defaultPortfolioContent.statsBar || defaultStatsBar,
+              focusTracks: data.content.focusTracks || defaultPortfolioContent.focusTracks || defaultFocusTracks,
+              aboutPillars: data.content.aboutPillars || defaultPortfolioContent.aboutPillars || defaultAboutPillars,
             };
             setContent(merged);
             setSavedBaseline(merged);
@@ -128,6 +142,8 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
             achievements: parsed.achievements || defaultPortfolioContent.achievements,
             educationMilestones: parsed.educationMilestones || defaultPortfolioContent.educationMilestones,
             statsBar: parsed.statsBar || defaultPortfolioContent.statsBar || defaultStatsBar,
+            focusTracks: parsed.focusTracks || defaultPortfolioContent.focusTracks || defaultFocusTracks,
+            aboutPillars: parsed.aboutPillars || defaultPortfolioContent.aboutPillars || defaultAboutPillars,
           };
           setContent(merged);
           setSavedBaseline(merged);
@@ -568,6 +584,64 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     });
   };
 
+  // Focus Tracks CMS
+  const updateFocusTrack = (updated: FocusTrack) => {
+    setContent((prev) => ({
+      ...prev,
+      focusTracks: (prev.focusTracks || defaultFocusTracks).map((t) =>
+        t.id === updated.id ? updated : t
+      ),
+    }));
+  };
+
+  const addFocusTrack = (newTrack: Omit<FocusTrack, 'id'> & { id?: string }) => {
+    const track: FocusTrack = {
+      ...newTrack,
+      id: newTrack.id || genId('track'),
+      published: newTrack.published !== false,
+    };
+    setContent((prev) => ({
+      ...prev,
+      focusTracks: [...(prev.focusTracks || defaultFocusTracks), track],
+    }));
+  };
+
+  const deleteFocusTrack = (id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      focusTracks: (prev.focusTracks || defaultFocusTracks).filter((t) => t.id !== id),
+    }));
+  };
+
+  // About Pillars CMS
+  const updateAboutPillar = (updated: AboutPillar) => {
+    setContent((prev) => ({
+      ...prev,
+      aboutPillars: (prev.aboutPillars || defaultAboutPillars).map((p) =>
+        p.id === updated.id ? updated : p
+      ),
+    }));
+  };
+
+  const addAboutPillar = (newPillar: Omit<AboutPillar, 'id'> & { id?: string }) => {
+    const pillar: AboutPillar = {
+      ...newPillar,
+      id: newPillar.id || genId('pillar'),
+      published: newPillar.published !== false,
+    };
+    setContent((prev) => ({
+      ...prev,
+      aboutPillars: [...(prev.aboutPillars || defaultAboutPillars), pillar],
+    }));
+  };
+
+  const deleteAboutPillar = (id: string) => {
+    setContent((prev) => ({
+      ...prev,
+      aboutPillars: (prev.aboutPillars || defaultAboutPillars).filter((p) => p.id !== id),
+    }));
+  };
+
   return (
     <PortfolioContext.Provider
       value={{
@@ -588,6 +662,16 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         // Stats Bar
         updateStatsBar,
         updateStatItem,
+
+        // Focus Tracks
+        updateFocusTrack,
+        addFocusTrack,
+        deleteFocusTrack,
+
+        // About Pillars
+        updateAboutPillar,
+        addAboutPillar,
+        deleteAboutPillar,
 
         // Skills
         addSkill,

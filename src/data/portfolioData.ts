@@ -10,7 +10,9 @@ import {
   CertificationItem,
   AchievementItem,
   EducationMilestone,
-  StatItem
+  StatItem,
+  FocusTrack,
+  AboutPillar
 } from '../types';
 
 export const personalProfile: PersonalProfile = {
@@ -375,6 +377,62 @@ export const defaultStatsBar: StatItem[] = [
   { id: 'stat-4', label: 'PORTFOLIO FOCUS', value: 'WHAT I KNOW & DID', colorClass: 'text-happy-orange' },
 ];
 
+export const defaultFocusTracks: FocusTrack[] = [
+  {
+    id: 'track-a',
+    trackLabel: 'Track A',
+    title: 'TRACK A : PYTHON DATA SCIENCE & EDA',
+    description: 'Hands-on data wrangling, missing data treatment, bivariate correlation analysis, and machine learning foundations using Pandas, NumPy, and Scikit-Learn.',
+    iconName: 'Terminal',
+    colorVariant: 'azure',
+    published: true,
+  },
+  {
+    id: 'track-b',
+    trackLabel: 'Track B',
+    title: 'TRACK B : BUSINESS INTELLIGENCE & BI',
+    description: 'Star schema data modeling, custom DAX metrics, interactive multi-page dashboards, and executive reporting in Microsoft Power BI and Excel.',
+    iconName: 'BarChart2',
+    colorVariant: 'verdant',
+    published: true,
+  },
+];
+
+export const defaultAboutPillars: AboutPillar[] = [
+  {
+    id: 'pillar-01',
+    num: '01',
+    title: 'FOUNDATION IN AI & DATA SCIENCE',
+    desc: 'Pursuing B.Tech AI & Data Science (Batch 2028), building a solid foundation in programming, analytical reasoning, and data problem-solving.',
+    borderClass: 'border-neon-green hover:border-malachite',
+    published: true,
+  },
+  {
+    id: 'pillar-02',
+    num: '02',
+    title: 'WHAT I KNOW TILL NOW',
+    desc: 'Hands-on competence in Python, SQL relational databases, exploratory data analysis, data wrangling, and interactive Power BI dashboards.',
+    borderClass: 'border-happy-orange hover:border-coral',
+    published: true,
+  },
+  {
+    id: 'pillar-03',
+    num: '03',
+    title: 'WHAT I HAVE BUILT TILL NOW',
+    desc: 'Built practical projects including business intelligence dashboards, exploratory analysis on real-world datasets, and prototype tools.',
+    borderClass: 'border-azure hover:border-foreground',
+    published: true,
+  },
+  {
+    id: 'pillar-04',
+    num: '04',
+    title: 'CONTINUOUS LEARNING & UPDATING',
+    desc: 'Dedicated to persistent hands-on learning, building new work, and updating this portfolio with every new milestone achieved.',
+    borderClass: 'border-coral hover:border-happy-orange',
+    published: true,
+  },
+];
+
 export const defaultPortfolioContent: PortfolioContent = {
   profile: personalProfile,
   skills: skillsData.map(s => ({ ...s, published: true })),
@@ -387,6 +445,8 @@ export const defaultPortfolioContent: PortfolioContent = {
   education: educationData,
   faq: faqData,
   statsBar: defaultStatsBar,
+  focusTracks: defaultFocusTracks,
+  aboutPillars: defaultAboutPillars,
 };
 
 
