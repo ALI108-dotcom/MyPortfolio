@@ -83,17 +83,17 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onOpenQuickEdit }) => 
             </div>
           </div>
 
-          {/* Center: Feedback notification banner if active */}
+          {/* Center / Mobile Feedback notification banner if active */}
           {feedback && (
             <div
-              className={`hidden md:flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] sm:text-xs font-bold uppercase tracking-wider ${
                 feedback.type === 'success'
                   ? 'bg-malachite/20 text-malachite border border-malachite/30'
                   : 'bg-destructive/20 text-destructive-foreground border border-destructive/40'
               }`}
             >
-              {feedback.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
-              <span>{feedback.message}</span>
+              {feedback.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> : <AlertCircle className="h-3.5 w-3.5 shrink-0" />}
+              <span className="truncate max-w-[180px] sm:max-w-none">{feedback.message}</span>
             </div>
           )}
 

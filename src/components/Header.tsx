@@ -133,6 +133,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLogin, onOpenEditor }) => 
 
         {/* Mobile / Tablet controls (visible on screens < lg) */}
         <div className="flex shrink-0 items-center gap-2 lg:hidden">
+          {/* Direct Mobile Edit Button */}
+          <button
+            onClick={isEditMode ? onOpenEditor : onOpenLogin}
+            title={isEditMode ? 'Open CMS Dashboard' : 'Edit Portfolio (Mobile)'}
+            aria-label={isEditMode ? 'Open CMS Dashboard' : 'Edit Portfolio (Mobile)'}
+            className="inline-flex items-center justify-center gap-1 h-8 rounded-md border border-happy-orange/50 bg-happy-orange/15 px-2.5 text-[11px] font-bold uppercase tracking-wider text-happy-orange cursor-pointer hover:bg-happy-orange/25 transition-colors"
+          >
+            <Edit3 className="h-3.5 w-3.5" />
+            <span>{isEditMode ? 'CMS' : 'Edit'}</span>
+          </button>
+
           <a
             href="#contact"
             className="hidden sm:inline-flex items-center gap-1 rounded-full grad-sunrise px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground"

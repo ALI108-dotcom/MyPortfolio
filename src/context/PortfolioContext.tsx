@@ -104,6 +104,12 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isCloudSynced, setIsCloudSynced] = useState<boolean>(false);
 
+  const lastCloudUpdatedRef = React.useRef<string | null>(null);
+  const hasUnsavedChangesRef = React.useRef<boolean>(false);
+  hasUnsavedChangesRef.current = hasUnsavedChanges;
+  const savedBaselineRef = React.useRef<PortfolioContent>(savedBaseline);
+  savedBaselineRef.current = savedBaseline;
+
   // Helper to sanitize & migrate legacy cached values
   const sanitizeAndMerge = (source: Partial<PortfolioContent>): PortfolioContent => {
     const merged: PortfolioContent = {
@@ -143,6 +149,45 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     return merged;
   };
 
+  // Real-time synchronization function: pulls latest Supabase data
+  const syncFromCloud = async () => {
+    // If the user has unsaved edits in progress on THIS screen, don't overwrite their typing
+    if (hasUnsavedChangesRef.current) return;
+
+    try {
+      const res = await fetch('/api/content?_t=' + Date.now(), {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
+      if (res.ok) {
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await res.json();
+          if (data.success && data.isCustom && data.content) {
+            const incomingString = JSON.stringify(data.content);
+            const baselineString = JSON.stringify(savedBaselineRef.current);
+
+            // If the incoming cloud data differs from current baseline, update automatically!
+            if (incomingString !== baselineString) {
+              const merged = sanitizeAndMerge(data.content);
+              setContent(merged);
+              setSavedBaseline(merged);
+              setIsCloudSynced(Boolean(data.isCloud));
+              lastCloudUpdatedRef.current = data.updated_at || null;
+
+              try {
+                localStorage.setItem('shaik_portfolio_content', JSON.stringify(merged));
+                localStorage.setItem('shaik_portfolio_content_v2', JSON.stringify(merged));
+              } catch {}
+            }
+          }
+        }
+      }
+    } catch {
+      // Ignore background fetch network interruptions
+    }
+  };
+
   // Load cloud or local persisted content on mount, and listen for URL hash sync
   useEffect(() => {
     async function loadInitialData() {
@@ -171,34 +216,10 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         }
       }
 
-      // 2. Fetch server / Supabase / Vercel KV content (cache-busting for mobile)
-      try {
-        const res = await fetch('/api/content?_t=' + Date.now(), {
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' },
-        });
-        if (res.ok) {
-          const contentType = res.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const data = await res.json();
-            if (data.success && data.isCustom && data.content) {
-              const merged = sanitizeAndMerge(data.content);
-              setContent(merged);
-              setSavedBaseline(merged);
-              setIsCloudSynced(Boolean(data.isCloud));
-              try {
-                localStorage.setItem('shaik_portfolio_content', JSON.stringify(merged));
-                localStorage.setItem('shaik_portfolio_content_v2', JSON.stringify(merged));
-              } catch {}
-              return;
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('Could not fetch server content, using local defaults', err);
-      }
+      // 2. Fetch server / Supabase content (cache-busting for mobile & laptop)
+      await syncFromCloud();
 
-      // 3. Check localStorage fallback (with legacy auto-migration)
+      // 3. Check localStorage fallback if cloud wasn't populated yet
       try {
         const local = localStorage.getItem('shaik_portfolio_content_v2') || localStorage.getItem('shaik_portfolio_content');
         if (local) {
@@ -206,10 +227,6 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
           const merged = sanitizeAndMerge(parsed);
           setContent(merged);
           setSavedBaseline(merged);
-          try {
-            // Keep localStorage updated with sanitized data
-            localStorage.setItem('shaik_portfolio_content_v2', JSON.stringify(merged));
-          } catch {}
         }
       } catch (e) {
         // Fallback silently
@@ -217,6 +234,46 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
 
     loadInitialData();
+
+    // 4. Background real-time polling every 5 seconds for 2-way auto sync between Mobile & Laptop
+    const pollTimer = setInterval(() => {
+      syncFromCloud();
+    }, 5000);
+
+    // 5. Immediate sync on window focus (e.g. switching tabs on Laptop or returning to browser on Mobile)
+    const handleFocus = () => syncFromCloud();
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        syncFromCloud();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // 6. Cross-tab instant communication via BroadcastChannel
+    let channel: BroadcastChannel | null = null;
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        channel = new BroadcastChannel('portfolio_sync_channel');
+        channel.onmessage = (event) => {
+          if (event.data?.type === 'CONTENT_UPDATED' && event.data?.content) {
+            if (!hasUnsavedChangesRef.current) {
+              const merged = sanitizeAndMerge(event.data.content);
+              setContent(merged);
+              setSavedBaseline(merged);
+            }
+          }
+        };
+      }
+    } catch {}
+
+    return () => {
+      clearInterval(pollTimer);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      channel?.close();
+    };
   }, []);
 
   // Track unsaved changes
@@ -271,6 +328,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     const dataToSave = sanitizeAndMerge(overrideContent || content);
     let cloudSaved = false;
     let cloudMessage = '';
+    let cloudError = '';
 
     try {
       const headers: Record<string, string> = {
@@ -280,37 +338,41 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         headers['Authorization'] = `Bearer ${authToken}`;
       }
 
-      // Try /api/content first (supports Supabase & Vercel KV), fallback to /api/content/save
-      let res = await fetch('/api/content', {
+      // Send to /api/content
+      const res = await fetch('/api/content', {
         method: 'POST',
         headers,
         body: JSON.stringify(dataToSave),
       });
 
-      if (!res.ok) {
-        res = await fetch('/api/content/save', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(dataToSave),
-        });
-      }
-
       const contentType = res.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await res.json();
-        if (res.ok && data.success) {
-          cloudSaved = Boolean(data.isCloud);
-          setIsCloudSynced(cloudSaved);
-          if (data.message) {
-            cloudMessage = data.message;
-          }
+        if (res.ok && data.success && data.isCloud) {
+          cloudSaved = true;
+          setIsCloudSynced(true);
+          cloudMessage = data.message || 'Saved to Supabase! Mobile and Laptop are now in sync.';
+          lastCloudUpdatedRef.current = data.updated_at || new Date().toISOString();
+
+          // Immediately broadcast to other open tabs on this device
+          try {
+            if (typeof BroadcastChannel !== 'undefined') {
+              const ch = new BroadcastChannel('portfolio_sync_channel');
+              ch.postMessage({ type: 'CONTENT_UPDATED', content: dataToSave });
+              ch.close();
+            }
+          } catch {}
+        } else {
+          cloudError = data.error || (data.message ? data.message : 'Database returned an error.');
         }
+      } else {
+        cloudError = `Server returned HTTP ${res.status}`;
       }
-    } catch {
-      // Static fallback
+    } catch (err: any) {
+      cloudError = err?.message || 'Network request failed';
     }
 
-    // Always persist to localStorage
+    // Always persist to localStorage for offline cache
     setSavedBaseline(dataToSave);
     setContent(dataToSave);
     setHasUnsavedChanges(false);
@@ -325,13 +387,14 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     if (cloudSaved) {
       return { 
         success: true, 
-        message: cloudMessage || 'Saved to Cloud Database! Mobile & laptop will automatically stay in sync.' 
+        message: cloudMessage || 'Saved to Supabase Cloud! Auto-synced across Laptop and Mobile.' 
       };
     }
 
+    // If cloud saving failed, let the user know clearly so they can check Vercel environment variables
     return { 
-      success: true, 
-      message: 'Saved to browser storage! Use "Mobile Sync Link" to mirror instantly to your phone.' 
+      success: false, 
+      error: cloudError || 'Cloud database not connected in Vercel! Add SUPABASE_URL and SUPABASE_ANON_KEY to sync across devices.' 
     };
   };
 

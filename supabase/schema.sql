@@ -11,7 +11,7 @@ create extension if not exists "uuid-ossp";
 -- =========================================================================
 -- 2. MAIN APPLICATION CONTENT TABLE (Unified JSONB Document)
 -- This powers the live Vercel Serverless API (/api/content) with atomic,
--- instantaneous sync between Laptop and Mobile CMS editing.
+-- instantaneous 2-way sync between Laptop and Mobile CMS editing.
 -- =========================================================================
 create table if not exists public.portfolio_content (
   id text primary key default 'main',
@@ -19,23 +19,9 @@ create table if not exists public.portfolio_content (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Enable Row Level Security (RLS)
-alter table public.portfolio_content enable row level security;
-
--- Drop existing policies first (prevents "policy already exists" error)
-drop policy if exists "Allow public read for portfolio_content" on public.portfolio_content;
-drop policy if exists "Allow update/insert for portfolio_content" on public.portfolio_content;
-
--- Read policy: Anyone can read portfolio content
-create policy "Allow public read for portfolio_content"
-  on public.portfolio_content for select
-  using (true);
-
--- Write policy: Allow authenticated and anon (via API) to insert/update
-create policy "Allow update/insert for portfolio_content"
-  on public.portfolio_content for all
-  using (true)
-  with check (true);
+-- Disable Row Level Security so API reads and writes from Mobile/Laptop
+-- are never blocked by policy errors:
+alter table public.portfolio_content disable row level security;
 
 -- =========================================================================
 -- 3. NORMALIZED RELATIONAL TABLES (For Supabase Table Editor inspection)
