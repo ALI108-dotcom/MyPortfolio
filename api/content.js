@@ -17,8 +17,10 @@ export default async function handler(req, res) {
   }
 
   // 1. Check for Supabase credentials (priority #1)
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const rawSupabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseUrl = rawSupabaseUrl ? rawSupabaseUrl.trim().replace(/\/+$/, '').replace(/\/rest\/v1\/?$/, '') : null;
+  const rawSupabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseKey = rawSupabaseKey ? rawSupabaseKey.trim() : null;
 
   // 2. Check for Vercel KV / Upstash credentials (fallback #2)
   const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -31,8 +33,7 @@ export default async function handler(req, res) {
     // Try Supabase first
     if (supabaseUrl && supabaseKey) {
       try {
-        const cleanUrl = supabaseUrl.replace(/\/+$/, '');
-        const resp = await fetch(`${cleanUrl}/rest/v1/portfolio_content?id=eq.main&select=*`, {
+        const resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content?id=eq.main&select=*`, {
           headers: {
             'apikey': supabaseKey,
             'Authorization': `Bearer ${supabaseKey}`,
@@ -110,8 +111,7 @@ export default async function handler(req, res) {
     // Save to Supabase
     if (supabaseUrl && supabaseKey) {
       try {
-        const cleanUrl = supabaseUrl.replace(/\/+$/, '');
-        const resp = await fetch(`${cleanUrl}/rest/v1/portfolio_content`, {
+        const resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content`, {
           method: 'POST',
           headers: {
             'apikey': supabaseKey,
