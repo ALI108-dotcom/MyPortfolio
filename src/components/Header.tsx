@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Globe, ExternalLink, ArrowRight } from 'lucide-react';
+import { Menu, X, Globe, ExternalLink, ArrowRight, Edit3 } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 
-export const Header: React.FC = () => {
-  const { content } = usePortfolio();
+interface HeaderProps {
+  onOpenLogin?: () => void;
+  onOpenEditor?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenLogin, onOpenEditor }) => {
+  const { content, isEditMode } = usePortfolio();
   const personalProfile = content.profile;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -115,6 +120,15 @@ export const Header: React.FC = () => {
             Projects
             <ArrowRight className="h-3 w-3 xl:h-3.5 xl:w-3.5 text-azure" aria-hidden="true" />
           </a>
+
+          {/* Quick Edit Trigger */}
+          <button
+            onClick={isEditMode ? onOpenEditor : onOpenLogin}
+            title={isEditMode ? 'Open CMS Dashboard' : 'Login to Edit Mode'}
+            className="ml-2 inline-flex items-center justify-center h-8 w-8 rounded-md border border-border text-muted-foreground hover:text-happy-orange hover:border-happy-orange/40 transition-colors cursor-pointer"
+          >
+            <Edit3 className="h-3.5 w-3.5" />
+          </button>
         </nav>
 
         {/* Mobile / Tablet controls (visible on screens < lg) */}
@@ -180,6 +194,22 @@ export const Header: React.FC = () => {
                 Explore Projects
                 <ArrowRight className="h-3.5 w-3.5 text-azure" />
               </a>
+
+              {/* Mobile Edit Mode Button */}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (isEditMode) {
+                    onOpenEditor?.();
+                  } else {
+                    onOpenLogin?.();
+                  }
+                }}
+                className="mt-2 flex items-center justify-center gap-2 rounded-md bg-happy-orange/15 border border-happy-orange/50 text-happy-orange py-2.5 text-xs font-bold uppercase tracking-widest hover:bg-happy-orange/25 transition-all cursor-pointer"
+              >
+                <Edit3 className="h-4 w-4" />
+                {isEditMode ? 'Open CMS Dashboard' : 'Edit Mode (Admin Login)'}
+              </button>
             </div>
           </nav>
         </div>

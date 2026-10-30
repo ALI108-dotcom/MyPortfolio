@@ -1,10 +1,15 @@
 import React from 'react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { GithubIcon, LinkedinIcon } from './icons';
-import { Mail, ArrowUp } from 'lucide-react';
+import { Mail, ArrowUp, Edit3 } from 'lucide-react';
 
-export const Footer: React.FC = () => {
-  const { content } = usePortfolio();
+interface FooterProps {
+  onOpenLogin?: () => void;
+  onOpenEditor?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenEditor }) => {
+  const { content, isEditMode } = usePortfolio();
   const profile = content.profile;
 
   const scrollToTop = () => {
@@ -137,9 +142,18 @@ export const Footer: React.FC = () => {
 
       {/* Bottom Copyright bar */}
       <div className="border-t border-white/10 py-6 text-center text-xs text-white/60">
-        <div className="mx-auto max-w-7xl px-5 flex flex-col sm:row items-center justify-between gap-2">
+        <div className="mx-auto max-w-7xl px-5 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>&copy; {new Date().getFullYear()} {profile.name}. All rights reserved.</span>
-          <span>Designed with high fidelity reference to Seva First Innovation UI architecture.</span>
+          <div className="flex items-center gap-4">
+            <span>Designed with high fidelity reference to Seva First Innovation UI architecture.</span>
+            <button
+              onClick={isEditMode ? onOpenEditor : onOpenLogin}
+              className="text-white/40 hover:text-happy-orange transition-colors inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider underline cursor-pointer"
+            >
+              <Edit3 className="h-3 w-3" />
+              {isEditMode ? 'CMS' : 'Admin'}
+            </button>
+          </div>
         </div>
       </div>
     </footer>

@@ -24,7 +24,25 @@ const PortfolioLayout: React.FC = () => {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [editorModalOpen, setEditorModalOpen] = useState(false);
 
-  // Global Keyboard Shortcut: Ctrl + Shift + E
+  // Global Keyboard Shortcut & URL Hash Trigger: Ctrl + Shift + E or #edit
+  useEffect(() => {
+    // Check if URL contains #edit (ideal for mobile bookmarking / sharing)
+    if (typeof window !== 'undefined') {
+      const checkUrlEdit = () => {
+        if (window.location.hash === '#edit' || window.location.search.includes('edit=true')) {
+          if (isEditMode) {
+            setEditorModalOpen(true);
+          } else {
+            setPasswordModalOpen(true);
+          }
+        }
+      };
+      checkUrlEdit();
+      window.addEventListener('hashchange', checkUrlEdit);
+      return () => window.removeEventListener('hashchange', checkUrlEdit);
+    }
+  }, [isEditMode]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Avoid triggering when user is typing in form inputs, textareas, or contentEditable elements
@@ -66,7 +84,10 @@ const PortfolioLayout: React.FC = () => {
       {isEditMode && <EditToolbar onOpenQuickEdit={() => setEditorModalOpen(true)} />}
 
       {/* Top Sticky Header */}
-      <Header />
+      <Header
+        onOpenLogin={() => setPasswordModalOpen(true)}
+        onOpenEditor={() => setEditorModalOpen(true)}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1">
@@ -118,7 +139,10 @@ const PortfolioLayout: React.FC = () => {
       </main>
 
       {/* Footer with tiranga rule and dark ink gradient */}
-      <Footer />
+      <Footer
+        onOpenLogin={() => setPasswordModalOpen(true)}
+        onOpenEditor={() => setEditorModalOpen(true)}
+      />
 
       {/* Hidden Password Authentication Dialog (Ctrl + Shift + E) */}
       <PasswordModal
