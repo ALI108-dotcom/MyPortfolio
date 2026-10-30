@@ -171,9 +171,12 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         }
       }
 
-      // 2. Fetch server / Vercel KV content
+      // 2. Fetch server / Supabase / Vercel KV content (cache-busting for mobile)
       try {
-        const res = await fetch('/api/content');
+        const res = await fetch('/api/content?_t=' + Date.now(), {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' },
+        });
         if (res.ok) {
           const contentType = res.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {

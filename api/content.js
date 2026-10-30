@@ -12,6 +12,11 @@ export default async function handler(req, res) {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
 
+  // Aggressive anti-cache headers so mobile devices always get fresh live data
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -37,6 +42,7 @@ export default async function handler(req, res) {
           headers: {
             'apikey': supabaseKey,
             'Authorization': `Bearer ${supabaseKey}`,
+            'Cache-Control': 'no-cache',
           },
         });
 
@@ -51,6 +57,9 @@ export default async function handler(req, res) {
               content: rows[0].content,
             });
           }
+        } else {
+          const errText = await resp.text();
+          console.error(`Supabase GET returned ${resp.status}: ${errText}`);
         }
       } catch (err) {
         console.error('Failed to read from Supabase:', err);
@@ -108,23 +117,60 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Empty or invalid content payload' });
     }
 
-    // Save to Supabase
+    // Save to Supabase (robust multi-strategy upsert)
     if (supabaseUrl && supabaseKey) {
       try {
-        const resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content`, {
+        const nowIso = new Date().toISOString();
+        const headers = {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+        };
+
+        // Strategy 1: PostgREST Upsert with on_conflict=id
+        let resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content?on_conflict=id`, {
           method: 'POST',
           headers: {
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates',
+            ...headers,
+            'Prefer': 'resolution=merge-duplicates,return=representation',
           },
           body: JSON.stringify({
             id: 'main',
             content: body,
-            updated_at: new Date().toISOString(),
+            updated_at: nowIso,
           }),
         });
+
+        // Strategy 2: If strategy 1 fails, attempt PATCH on existing row
+        if (!resp.ok) {
+          resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content?id=eq.main`, {
+            method: 'PATCH',
+            headers: {
+              ...headers,
+              'Prefer': 'return=representation',
+            },
+            body: JSON.stringify({
+              content: body,
+              updated_at: nowIso,
+            }),
+          });
+        }
+
+        // Strategy 3: If row didn't exist yet for PATCH, try simple POST insert
+        if (!resp.ok) {
+          resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content`, {
+            method: 'POST',
+            headers: {
+              ...headers,
+              'Prefer': 'return=representation',
+            },
+            body: JSON.stringify({
+              id: 'main',
+              content: body,
+              updated_at: nowIso,
+            }),
+          });
+        }
 
         if (resp.ok) {
           return res.status(200).json({
@@ -135,12 +181,14 @@ export default async function handler(req, res) {
           });
         } else {
           const errText = await resp.text();
+          console.error(`Supabase save error ${resp.status}:`, errText);
           return res.status(500).json({
             success: false,
             error: `Supabase returned status ${resp.status}: ${errText}`,
           });
         }
       } catch (err) {
+        console.error('Supabase connection exception:', err);
         return res.status(500).json({
           success: false,
           error: `Supabase connection error: ${err.message}`,
@@ -188,7 +236,7 @@ export default async function handler(req, res) {
       success: true,
       isCloud: false,
       provider: 'local-browser',
-      message: 'Saved to local browser storage. Add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel for instant Supabase cloud sync!',
+      message: 'Saved to local browser storage only. Add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel to sync across devices.',
     });
   }
 

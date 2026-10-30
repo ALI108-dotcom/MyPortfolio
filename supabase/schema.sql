@@ -2,8 +2,7 @@
 -- SUPABASE DATABASE SCHEMA FOR SHAIK ALI AHAMMAD PORTFOLIO
 -- =========================================================================
 -- This script sets up the complete database schema in Supabase.
--- You can paste this entire script into your Supabase project's SQL Editor
--- (Dashboard -> SQL Editor -> New query) and click "Run".
+-- It is 100% safe to re-run multiple times (idempotent).
 -- =========================================================================
 
 -- 1. EXTENSIONS
@@ -23,7 +22,7 @@ create table if not exists public.portfolio_content (
 -- Enable Row Level Security (RLS)
 alter table public.portfolio_content enable row level security;
 
--- Drop existing policies if any
+-- Drop existing policies first (prevents "policy already exists" error)
 drop policy if exists "Allow public read for portfolio_content" on public.portfolio_content;
 drop policy if exists "Allow update/insert for portfolio_content" on public.portfolio_content;
 
@@ -68,6 +67,8 @@ create table if not exists public.profiles (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 alter table public.profiles enable row level security;
+drop policy if exists "Public read profiles" on public.profiles;
+drop policy if exists "Public write profiles" on public.profiles;
 create policy "Public read profiles" on public.profiles for select using (true);
 create policy "Public write profiles" on public.profiles for all using (true) with check (true);
 
@@ -87,6 +88,8 @@ create table if not exists public.skills (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 alter table public.skills enable row level security;
+drop policy if exists "Public read skills" on public.skills;
+drop policy if exists "Public write skills" on public.skills;
 create policy "Public read skills" on public.skills for select using (true);
 create policy "Public write skills" on public.skills for all using (true) with check (true);
 
@@ -110,6 +113,8 @@ create table if not exists public.projects (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 alter table public.projects enable row level security;
+drop policy if exists "Public read projects" on public.projects;
+drop policy if exists "Public write projects" on public.projects;
 create policy "Public read projects" on public.projects for select using (true);
 create policy "Public write projects" on public.projects for all using (true) with check (true);
 
@@ -124,6 +129,8 @@ create table if not exists public.focus_tracks (
   published boolean default true
 );
 alter table public.focus_tracks enable row level security;
+drop policy if exists "Public read focus_tracks" on public.focus_tracks;
+drop policy if exists "Public write focus_tracks" on public.focus_tracks;
 create policy "Public read focus_tracks" on public.focus_tracks for select using (true);
 create policy "Public write focus_tracks" on public.focus_tracks for all using (true) with check (true);
 
@@ -137,6 +144,8 @@ create table if not exists public.about_pillars (
   published boolean default true
 );
 alter table public.about_pillars enable row level security;
+drop policy if exists "Public read about_pillars" on public.about_pillars;
+drop policy if exists "Public write about_pillars" on public.about_pillars;
 create policy "Public read about_pillars" on public.about_pillars for select using (true);
 create policy "Public write about_pillars" on public.about_pillars for all using (true) with check (true);
 
@@ -148,6 +157,8 @@ create table if not exists public.stats_bar (
   color_class text default 'text-azure'
 );
 alter table public.stats_bar enable row level security;
+drop policy if exists "Public read stats_bar" on public.stats_bar;
+drop policy if exists "Public write stats_bar" on public.stats_bar;
 create policy "Public read stats_bar" on public.stats_bar for select using (true);
 create policy "Public write stats_bar" on public.stats_bar for all using (true) with check (true);
 
@@ -165,6 +176,8 @@ create table if not exists public.certifications (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 alter table public.certifications enable row level security;
+drop policy if exists "Public read certifications" on public.certifications;
+drop policy if exists "Public write certifications" on public.certifications;
 create policy "Public read certifications" on public.certifications for select using (true);
 create policy "Public write certifications" on public.certifications for all using (true) with check (true);
 
@@ -183,6 +196,8 @@ create table if not exists public.learning_journey (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 alter table public.learning_journey enable row level security;
+drop policy if exists "Public read learning_journey" on public.learning_journey;
+drop policy if exists "Public write learning_journey" on public.learning_journey;
 create policy "Public read learning_journey" on public.learning_journey for select using (true);
 create policy "Public write learning_journey" on public.learning_journey for all using (true) with check (true);
 
@@ -203,6 +218,8 @@ create table if not exists public.experience (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 alter table public.experience enable row level security;
+drop policy if exists "Public read experience" on public.experience;
+drop policy if exists "Public write experience" on public.experience;
 create policy "Public read experience" on public.experience for select using (true);
 create policy "Public write experience" on public.experience for all using (true) with check (true);
 
@@ -218,6 +235,8 @@ create table if not exists public.education (
   key_coursework text[] default '{}'
 );
 alter table public.education enable row level security;
+drop policy if exists "Public read education" on public.education;
+drop policy if exists "Public write education" on public.education;
 create policy "Public read education" on public.education for select using (true);
 create policy "Public write education" on public.education for all using (true) with check (true);
 
@@ -231,23 +250,7 @@ create table if not exists public.education_milestones (
   published boolean default true
 );
 alter table public.education_milestones enable row level security;
+drop policy if exists "Public read education_milestones" on public.education_milestones;
+drop policy if exists "Public write education_milestones" on public.education_milestones;
 create policy "Public read education_milestones" on public.education_milestones for select using (true);
 create policy "Public write education_milestones" on public.education_milestones for all using (true) with check (true);
-
--- =========================================================================
--- 4. USEFUL DATABASE QUERIES FOR MANAGEMENT & INSPECTION
--- =========================================================================
-
--- Query 1: Fetch Current Portfolio JSON (Used by /api/content)
--- SELECT content FROM public.portfolio_content WHERE id = 'main' LIMIT 1;
-
--- Query 2: Upsert / Save Portfolio Content
--- INSERT INTO public.portfolio_content (id, content, updated_at)
--- VALUES ('main', '{"profile": {"name": "Shaik Ali Ahammad"}}'::jsonb, now())
--- ON CONFLICT (id) DO UPDATE SET content = EXCLUDED.content, updated_at = now();
-
--- Query 3: Inspect all skills
--- SELECT id, name, category, proficiency FROM public.skills ORDER BY name ASC;
-
--- Query 4: Inspect all featured projects
--- SELECT id, title, category, technologies FROM public.projects WHERE featured = true;
