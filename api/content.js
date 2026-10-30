@@ -1,5 +1,6 @@
 // Serverless API route for Vercel: /api/content
-// Supports Vercel KV / Upstash Redis for persistent cross-device cloud storage.
+// Supports Supabase PostgreSQL (primary) & Vercel KV / Upstash (secondary)
+// Enables real-time cross-device persistence between Laptop and Mobile devices.
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -15,11 +16,47 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  // 1. Check for Supabase credentials (priority #1)
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+  // 2. Check for Vercel KV / Upstash credentials (fallback #2)
   const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  // 1. GET /api/content
+  // --------------------------------------------------------------------------
+  // GET /api/content: Retrieve latest portfolio data from cloud database
+  // --------------------------------------------------------------------------
   if (req.method === 'GET') {
+    // Try Supabase first
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const cleanUrl = supabaseUrl.replace(/\/+$/, '');
+        const resp = await fetch(`${cleanUrl}/rest/v1/portfolio_content?id=eq.main&select=*`, {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        });
+
+        if (resp.ok) {
+          const rows = await resp.json();
+          if (Array.isArray(rows) && rows.length > 0 && rows[0].content) {
+            return res.status(200).json({
+              success: true,
+              isCustom: true,
+              isCloud: true,
+              provider: 'supabase',
+              content: rows[0].content,
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to read from Supabase:', err);
+      }
+    }
+
+    // Try Vercel KV as fallback
     if (kvUrl && kvToken) {
       try {
         const resp = await fetch(`${kvUrl}/get/shaik_portfolio_content`, {
@@ -33,6 +70,7 @@ export default async function handler(req, res) {
               success: true,
               isCustom: true,
               isCloud: true,
+              provider: 'vercel-kv',
               content,
             });
           }
@@ -45,13 +83,16 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       isCustom: false,
-      isCloud: Boolean(kvUrl && kvToken),
+      isCloud: Boolean((supabaseUrl && supabaseKey) || (kvUrl && kvToken)),
+      provider: supabaseUrl && supabaseKey ? 'supabase' : (kvUrl && kvToken ? 'vercel-kv' : 'none'),
       content: null,
-      message: kvUrl ? 'No custom content saved in Cloud KV yet.' : 'Cloud KV not connected yet.',
+      message: (supabaseUrl || kvUrl) ? 'No custom content saved in cloud database yet.' : 'Cloud database not connected yet.',
     });
   }
 
-  // 2. POST /api/content or /api/content/save
+  // --------------------------------------------------------------------------
+  // POST /api/content: Save portfolio data to Supabase or Vercel KV
+  // --------------------------------------------------------------------------
   if (req.method === 'POST') {
     let body = req.body;
     if (typeof body === 'string') {
@@ -66,6 +107,48 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Empty or invalid content payload' });
     }
 
+    // Save to Supabase
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const cleanUrl = supabaseUrl.replace(/\/+$/, '');
+        const resp = await fetch(`${cleanUrl}/rest/v1/portfolio_content`, {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates',
+          },
+          body: JSON.stringify({
+            id: 'main',
+            content: body,
+            updated_at: new Date().toISOString(),
+          }),
+        });
+
+        if (resp.ok) {
+          return res.status(200).json({
+            success: true,
+            isCloud: true,
+            provider: 'supabase',
+            message: 'Portfolio successfully saved to Supabase! Mobile and Laptop are now in sync.',
+          });
+        } else {
+          const errText = await resp.text();
+          return res.status(500).json({
+            success: false,
+            error: `Supabase returned status ${resp.status}: ${errText}`,
+          });
+        }
+      } catch (err) {
+        return res.status(500).json({
+          success: false,
+          error: `Supabase connection error: ${err.message}`,
+        });
+      }
+    }
+
+    // Save to Vercel KV fallback
     if (kvUrl && kvToken) {
       try {
         const payloadString = JSON.stringify(body);
@@ -82,7 +165,8 @@ export default async function handler(req, res) {
           return res.status(200).json({
             success: true,
             isCloud: true,
-            message: 'Portfolio successfully saved to Cloud Database! Mobile & Laptop will now stay in sync.',
+            provider: 'vercel-kv',
+            message: 'Portfolio successfully saved to Vercel KV! Mobile and Laptop will now stay in sync.',
           });
         } else {
           const errText = await resp.text();
@@ -99,11 +183,12 @@ export default async function handler(req, res) {
       }
     }
 
-    // KV not configured yet on Vercel
+    // Neither cloud database configured yet on Vercel
     return res.status(200).json({
       success: true,
       isCloud: false,
-      message: 'Saved to local browser storage. Connect free Vercel KV for instant cloud multi-device sync!',
+      provider: 'local-browser',
+      message: 'Saved to local browser storage. Add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel for instant Supabase cloud sync!',
     });
   }
 

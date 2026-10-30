@@ -267,6 +267,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
   const saveChanges = async (overrideContent?: PortfolioContent): Promise<{ success: boolean; message?: string; error?: string }> => {
     const dataToSave = sanitizeAndMerge(overrideContent || content);
     let cloudSaved = false;
+    let cloudMessage = '';
 
     try {
       const headers: Record<string, string> = {
@@ -276,7 +277,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         headers['Authorization'] = `Bearer ${authToken}`;
       }
 
-      // Try /api/content first (supports Vercel KV), fallback to /api/content/save
+      // Try /api/content first (supports Supabase & Vercel KV), fallback to /api/content/save
       let res = await fetch('/api/content', {
         method: 'POST',
         headers,
@@ -297,6 +298,9 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         if (res.ok && data.success) {
           cloudSaved = Boolean(data.isCloud);
           setIsCloudSynced(cloudSaved);
+          if (data.message) {
+            cloudMessage = data.message;
+          }
         }
       }
     } catch {
@@ -318,7 +322,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     if (cloudSaved) {
       return { 
         success: true, 
-        message: 'Saved to Cloud Database! Mobile & laptop will automatically stay in sync.' 
+        message: cloudMessage || 'Saved to Cloud Database! Mobile & laptop will automatically stay in sync.' 
       };
     }
 
