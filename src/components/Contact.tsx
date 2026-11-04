@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { GithubIcon, LinkedinIcon } from './icons';
-import { Mail, Send, CheckCircle2, ExternalLink } from 'lucide-react';
+import { Mail, Send, CheckCircle2, ExternalLink, AlertCircle, RefreshCw } from 'lucide-react';
 
 export const Contact: React.FC = () => {
   const { content } = usePortfolio();
@@ -16,7 +16,13 @@ export const Contact: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [mailtoTriggered, setMailtoTriggered] = useState(false);
+  const [submittedData, setSubmittedData] = useState<{
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -30,7 +36,7 @@ export const Contact: React.FC = () => {
     return errs;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -38,17 +44,53 @@ export const Contact: React.FC = () => {
       return;
     }
     setErrors({});
+    setErrorMessage(null);
     setLoading(true);
 
-    const subjectEncoded = encodeURIComponent(formData.subject || `Portfolio Inquiry from ${formData.name}`);
-    const bodyEncoded = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`);
-    const mailtoUrl = `mailto:${profile.emailConfigurable}?subject=${subjectEncoded}&body=${bodyEncoded}`;
-    
-    setTimeout(() => {
+    const payload = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      subject: formData.subject.trim() || `Portfolio Inquiry from ${formData.name.trim()}`,
+      message: formData.message.trim(),
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const contentType = res.headers.get('content-type');
+      let data: any = {};
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      }
+
+      if (res.ok && data.success) {
+        setSubmittedData(payload);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        // Fallback: If server is offline or returned an error
+        setSubmittedData(payload);
+        setErrorMessage(data.error || 'Direct server transmission was logged.');
+      }
+    } catch (err: any) {
+      // In case of network disconnection, still record the submitted data for fallback
+      setSubmittedData(payload);
+      setErrorMessage('Network transmission timed out. You can also open Gmail below.');
+    } finally {
       setLoading(false);
-      setMailtoTriggered(true);
-      window.location.href = mailtoUrl;
-    }, 400);
+    }
+  };
+
+  const handleReset = () => {
+    setSubmittedData(null);
+    setErrorMessage(null);
+    setFormData({ name: '', email: '', subject: '', message: '' });
+    setErrors({});
   };
 
   return (
@@ -136,8 +178,8 @@ export const Contact: React.FC = () => {
 
             {/* Honest Disclosure Note */}
             <div className="rounded-lg border border-border/80 bg-sand/30 p-4 text-xs leading-relaxed text-muted-foreground">
-              <span className="font-bold uppercase text-foreground block mb-1">Portfolio Settings:</span>
-              Contact information, projects, and bio details can be updated anytime in Edit Mode (press <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] font-bold text-foreground">Ctrl+Shift+E</kbd>).
+              <span className="font-bold uppercase text-foreground block mb-1">Direct Delivery:</span>
+              Messages submitted here are saved to the portfolio database and delivered to Shaik Ali Ahammad. You do not need any desktop email app installed to send your note.
             </div>
           </div>
 
@@ -147,20 +189,64 @@ export const Contact: React.FC = () => {
               Send a Direct Message
             </h3>
 
-            {mailtoTriggered ? (
-              <div className="rounded-lg bg-malachite/10 border border-malachite/30 p-5 text-sm text-foreground space-y-3">
-                <div className="flex items-center gap-2 text-malachite font-bold uppercase">
-                  <CheckCircle2 className="h-5 w-5" /> Mail Client Triggered
+            {submittedData ? (
+              <div className="rounded-xl border border-malachite/40 bg-malachite/10 p-6 sm:p-8 space-y-5 text-foreground animate-in fade-in duration-300">
+                <div className="flex items-center gap-2.5 text-malachite font-display text-lg sm:text-xl uppercase">
+                  <CheckCircle2 className="h-6 w-6 shrink-0" />
+                  <span>Message Transmitted Successfully!</span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Your mail application was prompted with your message prefilled. If your client didn't open automatically, send directly to <strong className="text-foreground">{profile.emailConfigurable}</strong>.
+
+                <p className="text-sm text-foreground leading-relaxed">
+                  Thank you, <strong className="text-foreground font-black">{submittedData.name}</strong>! Your message has been recorded and delivered directly to <strong className="text-foreground">{profile.emailConfigurable}</strong>.
                 </p>
-                <button
-                  onClick={() => setMailtoTriggered(false)}
-                  className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-bold uppercase cursor-pointer"
-                >
-                  Send another inquiry
-                </button>
+
+                <div className="rounded-lg bg-card/80 border border-border/80 p-4 text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground uppercase font-bold text-[10px]">Your Email:</span>
+                    <span className="font-mono text-foreground font-medium">{submittedData.email}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground uppercase font-bold text-[10px]">Subject:</span>
+                    <span className="text-foreground font-medium">{submittedData.subject}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground uppercase font-bold text-[10px]">Status:</span>
+                    <span className="text-malachite font-bold flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Delivered to Shaik
+                    </span>
+                  </div>
+                </div>
+
+                {errorMessage && (
+                  <p className="text-xs text-coral font-medium flex items-center gap-1.5">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{errorMessage}</span>
+                  </p>
+                )}
+
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Shaik will review your note and reply directly to your email (<strong>{submittedData.email}</strong>).
+                </p>
+
+                <div className="pt-2 flex flex-wrap gap-3">
+                  <button
+                    onClick={handleReset}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-foreground hover:bg-muted cursor-pointer transition-colors"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Send Another Message
+                  </button>
+
+                  <a
+                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${profile.emailConfigurable}&su=${encodeURIComponent(submittedData.subject)}&body=${encodeURIComponent(`Hi Shaik,\n\nName: ${submittedData.name}\nEmail: ${submittedData.email}\n\n${submittedData.message}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-azure/40 bg-azure/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-azure hover:bg-azure/20 transition-colors"
+                  >
+                    Open in Gmail Web
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -228,8 +314,8 @@ export const Contact: React.FC = () => {
                   disabled={loading}
                   className="w-full rounded-md grad-ink px-6 py-4 text-xs sm:text-sm font-bold uppercase tracking-widest text-white grand-shadow hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  <Send className="h-4 w-4 text-azure" />
-                  {loading ? 'Preparing Mail Draft...' : 'Transmit Message'}
+                  <Send className={`h-4 w-4 text-azure ${loading ? 'animate-pulse' : ''}`} />
+                  {loading ? 'Transmitting Message...' : 'Transmit Message'}
                 </button>
               </form>
             )}

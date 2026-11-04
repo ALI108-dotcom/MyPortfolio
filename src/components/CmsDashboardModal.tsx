@@ -25,7 +25,9 @@ import {
   Camera,
   BarChart3,
   Smartphone,
-  RefreshCw
+  RefreshCw,
+  Mail,
+  ExternalLink
 } from 'lucide-react';
 import { parseVideoUrl } from '../utils/videoHelper';
 import { processImageFile } from '../utils/imageHelper';
@@ -48,6 +50,7 @@ interface CmsDashboardModalProps {
 
 type TabType = 
   | 'overview' 
+  | 'inbox'
   | 'statsbar'
   | 'skills' 
   | 'projects' 
@@ -117,6 +120,41 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
   const [editingItemId, setEditingItemId] = useState<string | null>(null); // null = new item
   const [formData, setFormData] = useState<any>({});
   const [tagInput, setTagInput] = useState('');
+
+  // Contact form messages inbox
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+
+  const fetchMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const res = await fetch('/api/contact?_t=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.messages)) {
+          setMessages(data.messages);
+        }
+      }
+    } catch {
+      // Ignore
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const handleDeleteMessage = async (id: string) => {
+    if (!window.confirm('Delete this visitor message?')) return;
+    try {
+      await fetch(`/api/contact?id=${id}`, { method: 'DELETE' });
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+    } catch {}
+  };
+
+  React.useEffect(() => {
+    if (isOpen) {
+      fetchMessages();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -460,6 +498,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
 
               {[
                 { id: 'overview', label: 'Overview & Stats', icon: Sparkles, count: null },
+                { id: 'inbox', label: 'Visitor Messages', icon: Mail, count: messages.length },
                 { id: 'statsbar', label: 'Stats Highlights', icon: BarChart3, count: 4 },
                 { id: 'skills', label: 'Skills & Tools', icon: Code, count: skillsCount },
                 { id: 'projects', label: 'Featured Projects', icon: Layers, count: projectsCount },
@@ -522,7 +561,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
             
             {/* Mobile Category Tab Strip */}
             <div className="flex md:hidden overflow-x-auto gap-1 pb-3 mb-4 border-b border-border">
-              {(['overview', 'statsbar', 'skills', 'projects', 'learning', 'certifications', 'achievements', 'experience', 'education', 'profile'] as TabType[]).map((tab) => (
+              {(['overview', 'inbox', 'statsbar', 'skills', 'projects', 'learning', 'certifications', 'achievements', 'experience', 'education', 'profile'] as TabType[]).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => {
@@ -1962,6 +2001,105 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                         </div>
                       )}
                     </div>
+                  </div>
+                )}
+
+                {/* INBOX / VISITOR MESSAGES TAB */}
+                {activeTab === 'inbox' && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
+                      <div>
+                        <h3 className="font-display text-xl uppercase tracking-wider text-foreground flex items-center gap-2">
+                          <Mail className="h-5 w-5 text-azure" />
+                          Visitor Messages (Inbox)
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Direct inquiries submitted by recruiters, collaborators, and visitors through your contact form.
+                        </p>
+                      </div>
+                      <button
+                        onClick={fetchMessages}
+                        disabled={loadingMessages}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-foreground hover:bg-muted cursor-pointer transition-colors w-fit"
+                      >
+                        <RefreshCw className={`h-3.5 w-3.5 ${loadingMessages ? 'animate-spin' : ''}`} />
+                        <span>Refresh Inbox</span>
+                      </button>
+                    </div>
+
+                    {loadingMessages ? (
+                      <div className="p-8 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Loading messages from database...
+                      </div>
+                    ) : messages.length === 0 ? (
+                      <div className="rounded-xl border border-dashed border-border p-10 text-center space-y-2">
+                        <Mail className="h-8 w-8 text-muted-foreground/40 mx-auto" />
+                        <h4 className="font-display text-sm uppercase text-foreground">No Messages Received Yet</h4>
+                        <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                          When visitors fill out your contact form, their notes will be securely recorded here so you never miss an inquiry.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {messages.map((msg: any) => (
+                          <div
+                            key={msg.id}
+                            className="rounded-xl border border-border bg-card p-5 grand-shadow space-y-3"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-2.5">
+                              <div>
+                                <span className="font-display text-base uppercase text-foreground block">
+                                  {msg.name}
+                                </span>
+                                <span className="text-xs text-azure font-mono">
+                                  {msg.email}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-muted-foreground font-mono">
+                                  {new Date(msg.created_at).toLocaleString()}
+                                </span>
+                                <button
+                                  onClick={() => handleDeleteMessage(msg.id)}
+                                  className="text-muted-foreground hover:text-coral p-1 rounded transition-colors"
+                                  title="Delete Message"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Subject: <span className="text-foreground">{msg.subject || 'Portfolio Inquiry'}</span>
+                              </span>
+                              <p className="text-xs text-foreground bg-muted/40 p-3 rounded-lg border border-border/50 whitespace-pre-wrap leading-relaxed">
+                                {msg.message}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              <a
+                                href={`mailto:${msg.email}?subject=${encodeURIComponent(`Re: ${msg.subject || 'Portfolio Inquiry'}`)}&body=${encodeURIComponent(`Hi ${msg.name},\n\nThank you for reaching out via my portfolio!\n\n`)}`}
+                                className="inline-flex items-center gap-1.5 rounded-md bg-azure text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 shadow transition-opacity"
+                              >
+                                <Mail className="h-3.5 w-3.5" />
+                                Reply to {msg.name}
+                              </a>
+                              <a
+                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${msg.email}&su=${encodeURIComponent(`Re: ${msg.subject || 'Portfolio Inquiry'}`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-foreground hover:bg-muted transition-colors"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5 text-azure" />
+                                Reply in Gmail Web
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

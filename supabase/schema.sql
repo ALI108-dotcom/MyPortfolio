@@ -240,3 +240,20 @@ drop policy if exists "Public read education_milestones" on public.education_mil
 drop policy if exists "Public write education_milestones" on public.education_milestones;
 create policy "Public read education_milestones" on public.education_milestones for select using (true);
 create policy "Public write education_milestones" on public.education_milestones for all using (true) with check (true);
+
+-- =========================================================================
+-- 4. CONTACT MESSAGES TABLE (Inbox for Messages Sent from Other Visitors)
+-- =========================================================================
+create table if not exists public.contact_messages (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  subject text default 'Portfolio Inquiry',
+  message text not null,
+  is_read boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Disable RLS to allow direct insertion from external visitors and full CMS access
+alter table public.contact_messages disable row level security;
+
