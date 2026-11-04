@@ -21,25 +21,31 @@ export default async function handler(req, res) {
   }
 
   // 1. Resolve Supabase credentials (flexible environment variable names)
-  const rawSupabaseUrl =
+  let rawSupabaseUrl =
     process.env.SUPABASE_URL ||
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.VITE_SUPABASE_URL ||
-    'https://jnnnymecvnfkgazzmzry.supabase.co';
+    process.env.VITE_SUPABASE_URL;
+
+  if (!rawSupabaseUrl || rawSupabaseUrl.includes('ybddnlhnfgswpakqkcx')) {
+    rawSupabaseUrl = 'https://jnnnymecvnfkgazzmzry.supabase.co';
+  }
 
   // Clean the URL: strip /rest/v1 or trailing slashes if user pasted full REST endpoint
   const supabaseUrl = rawSupabaseUrl
     ? rawSupabaseUrl.trim().replace(/\/+$/, '').replace(/\/rest\/v1\/?$/, '')
     : null;
 
-  const rawSupabaseKey =
+  let rawSupabaseKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.VITE_SUPABASE_ANON_KEY ||
-    'sb_publishable_hzGyOs8g82aBksr_AOGJ5Q_i2uP7tD_';
+    process.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!rawSupabaseKey || rawSupabaseKey.includes('ZVeR75nIm0CqzV3izDDLHA')) {
+    rawSupabaseKey = 'sb_publishable_hzGyOs8g82aBksr_AOGJ5Q_i2uP7tD_';
+  }
 
   const supabaseKey = rawSupabaseKey ? rawSupabaseKey.trim() : null;
 
