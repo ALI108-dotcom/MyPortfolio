@@ -26,7 +26,8 @@ export default async function handler(req, res) {
   const rawSupabaseUrl =
     process.env.SUPABASE_URL ||
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.VITE_SUPABASE_URL;
+    process.env.VITE_SUPABASE_URL ||
+    'https://jnnnymecvnfkgazzmzry.supabase.co';
 
   const supabaseUrl = rawSupabaseUrl
     ? rawSupabaseUrl.trim().replace(/\/+$/, '').replace(/\/rest\/v1\/?$/, '')
@@ -38,7 +39,8 @@ export default async function handler(req, res) {
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.VITE_SUPABASE_ANON_KEY;
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    'sb_publishable_hzGyOs8g82aBksr_AOGJ5Q_i2uP7tD_';
 
   const supabaseKey = rawSupabaseKey ? rawSupabaseKey.trim() : null;
 

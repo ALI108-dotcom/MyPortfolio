@@ -3,11 +3,11 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // Resolve Supabase configuration
 const supabaseUrl =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) ||
-  'https://ybddnlhnfgswpakqkcx.supabase.co';
+  'https://jnnnymecvnfkgazzmzry.supabase.co';
 
 const supabaseAnonKey =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
-  'sb_publishable_ZVeR75nIm0CqzV3izDDLHA_-5_op';
+  'sb_publishable_hzGyOs8g82aBksr_AOGJ5Q_i2uP7tD_';
 
 let client: SupabaseClient | null = null;
 
