@@ -142,6 +142,7 @@ export interface PersonalProfile {
   introVideoTitle?: string;
   introVideoDuration?: string;
   photoUrl?: string;
+  heroSkills?: string[]; // Min 5, Max 20 highlight pills on the Hero photo badge
 }
 
 export interface StatItem {

@@ -27,7 +27,8 @@ import {
   Smartphone,
   RefreshCw,
   Mail,
-  ExternalLink
+  ExternalLink,
+  Tag
 } from 'lucide-react';
 import { parseVideoUrl } from '../utils/videoHelper';
 import { processImageFile } from '../utils/imageHelper';
@@ -120,6 +121,47 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
   const [editingItemId, setEditingItemId] = useState<string | null>(null); // null = new item
   const [formData, setFormData] = useState<any>({});
   const [tagInput, setTagInput] = useState('');
+
+  // Hero highlight pills state (Min 5, Max 20 skills)
+  const [newHeroSkillInput, setNewHeroSkillInput] = useState('');
+  const [heroSkillError, setHeroSkillError] = useState<string | null>(null);
+
+  const currentHeroSkills: string[] = (content.profile.heroSkills && content.profile.heroSkills.length > 0)
+    ? content.profile.heroSkills
+    : ['Python & SQL', 'Microsoft Power BI', 'Machine Learning', 'Data Analysis & EDA', 'Artificial Intelligence'];
+
+  const handleAddHeroSkill = (skillName?: string) => {
+    const skill = (skillName || newHeroSkillInput).trim();
+    if (!skill) return;
+
+    if (currentHeroSkills.length >= 20) {
+      setHeroSkillError('Maximum limit of 20 highlight skills reached.');
+      setTimeout(() => setHeroSkillError(null), 3500);
+      return;
+    }
+
+    if (currentHeroSkills.some((s) => s.toLowerCase() === skill.toLowerCase())) {
+      setHeroSkillError(`"${skill}" is already added.`);
+      setTimeout(() => setHeroSkillError(null), 3500);
+      return;
+    }
+
+    setHeroSkillError(null);
+    const updated = [...currentHeroSkills, skill];
+    updateProfile({ heroSkills: updated });
+    setNewHeroSkillInput('');
+  };
+
+  const handleRemoveHeroSkill = (index: number) => {
+    const updated = currentHeroSkills.filter((_, i) => i !== index);
+    if (updated.length < 5) {
+      setHeroSkillError(`Note: Minimum 5 skills required for photo badge (currently ${updated.length}/20).`);
+      setTimeout(() => setHeroSkillError(null), 4000);
+    } else {
+      setHeroSkillError(null);
+    }
+    updateProfile({ heroSkills: updated });
+  };
 
   // Contact form messages inbox
   const [messages, setMessages] = useState<any[]>([]);
@@ -1848,6 +1890,138 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                           <p className="text-xs text-muted-foreground leading-relaxed">
                             Click <strong>Select Image from Computer</strong> to open your File Explorer and choose any photo (JPG, PNG, WEBP). Click <strong>Save to Server</strong> to persist your change.
                           </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* HERO PHOTO HIGHLIGHT SKILLS (PILLS) - MIN 5, MAX 20 */}
+                    <div className="rounded-xl border border-border bg-card p-4 sm:p-5 grand-shadow space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-display text-base uppercase tracking-wider text-foreground flex items-center gap-2">
+                              <Tag className="h-4 w-4 text-happy-orange" /> Hero Photo Highlight Skills
+                            </span>
+                            <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                              currentHeroSkills.length < 5
+                                ? 'bg-coral/15 text-coral border-coral/30'
+                                : currentHeroSkills.length >= 20
+                                ? 'bg-happy-orange/15 text-happy-orange border-happy-orange/30'
+                                : 'bg-malachite/15 text-malachite border-malachite/30'
+                            }`}>
+                              {currentHeroSkills.length} / 20 Skills
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Badges displayed on the bottom of your homepage profile photo overlay. <strong>Min 5, Max 20 skills</strong>.
+                          </p>
+                        </div>
+
+                        {currentHeroSkills.length < 5 ? (
+                          <span className="text-[10px] font-bold text-coral flex items-center gap-1 uppercase">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" /> Add {5 - currentHeroSkills.length} more (min 5)
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-malachite flex items-center gap-1 uppercase">
+                            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> Requirements Met
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Current Highlight Pills with Remove Action */}
+                      <div className="space-y-2">
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Active Photo Badges (Drag / View)
+                        </label>
+                        <div className="flex flex-wrap gap-2 p-3 rounded-lg border border-border bg-muted/30 min-h-[50px] items-center">
+                          {currentHeroSkills.map((skill, index) => (
+                            <span
+                              key={`${skill}-${index}`}
+                              className="inline-flex items-center gap-1.5 rounded-md bg-black/80 text-white border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wider shadow-sm group hover:border-coral transition-colors"
+                            >
+                              <span>{skill}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveHeroSkill(index)}
+                                className="h-4 w-4 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-coral/80 transition-colors"
+                                title={`Remove ${skill}`}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Add New Skill Input */}
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={newHeroSkillInput}
+                            onChange={(e) => setNewHeroSkillInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddHeroSkill();
+                              }
+                            }}
+                            disabled={currentHeroSkills.length >= 20}
+                            placeholder={currentHeroSkills.length >= 20 ? 'Maximum 20 skills reached' : 'Type skill name (e.g. Deep Learning, Tableau, FastAPI)...'}
+                            className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure disabled:opacity-50"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleAddHeroSkill()}
+                            disabled={!newHeroSkillInput.trim() || currentHeroSkills.length >= 20}
+                            className="inline-flex items-center gap-1.5 rounded-md bg-azure text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90 shadow transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                          >
+                            <Plus className="h-4 w-4" />
+                            <span>Add Skill</span>
+                          </button>
+                        </div>
+
+                        {heroSkillError && (
+                          <p className="text-xs text-coral font-medium flex items-center gap-1.5 animate-in fade-in">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            <span>{heroSkillError}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Quick Suggestions */}
+                      <div className="pt-2 border-t border-border/60">
+                        <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                          Quick Add Suggestions:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {[
+                            'Deep Learning',
+                            'Pandas & NumPy',
+                            'Data Visualization',
+                            'Scikit-Learn',
+                            'TensorFlow',
+                            'Tableau',
+                            'NLP & LLMs',
+                            'Git & GitHub',
+                            'Statistics & Probability',
+                            'Data Preprocessing',
+                            'Feature Engineering'
+                          ]
+                            .filter((suggested) => !currentHeroSkills.some((s) => s.toLowerCase() === suggested.toLowerCase()))
+                            .slice(0, 7)
+                            .map((preset) => (
+                              <button
+                                key={preset}
+                                type="button"
+                                onClick={() => handleAddHeroSkill(preset)}
+                                disabled={currentHeroSkills.length >= 20}
+                                className="inline-flex items-center gap-1 rounded bg-muted hover:bg-azure/20 hover:text-azure px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors cursor-pointer border border-border"
+                              >
+                                <Plus className="h-3 w-3" />
+                                <span>{preset}</span>
+                              </button>
+                            ))}
                         </div>
                       </div>
                     </div>

@@ -15,6 +15,14 @@ import {
   AboutPillar
 } from '../types';
 
+export const defaultHeroSkills: string[] = [
+  'Python & SQL',
+  'Microsoft Power BI',
+  'Machine Learning',
+  'Data Analysis & EDA',
+  'Artificial Intelligence'
+];
+
 export const personalProfile: PersonalProfile = {
   name: 'Shaik Ali Ahammad',
   roleTitle: 'What I Know & What I Did',
@@ -35,6 +43,7 @@ export const personalProfile: PersonalProfile = {
   introVideoUrl: 'https://www.youtube.com/watch?v=xC-c7E5PK0Y', // Sample 3-minute introduction video (3-13 min range)
   introVideoTitle: 'Introduction & Technical Learning Journey',
   introVideoDuration: '3 min',
+  heroSkills: defaultHeroSkills,
 };
 
 export const skillsData: SkillItem[] = [

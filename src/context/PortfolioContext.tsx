@@ -14,7 +14,7 @@ import {
   FocusTrack,
   AboutPillar
 } from '../types';
-import { defaultPortfolioContent, defaultStatsBar, defaultFocusTracks, defaultAboutPillars } from '../data/portfolioData';
+import { defaultPortfolioContent, defaultStatsBar, defaultFocusTracks, defaultAboutPillars, defaultHeroSkills } from '../data/portfolioData';
 
 interface PortfolioContextType {
   content: PortfolioContent;
@@ -118,6 +118,9 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
       profile: {
         ...defaultPortfolioContent.profile,
         ...(source.profile || {}),
+        heroSkills: Array.isArray(source.profile?.heroSkills) && source.profile.heroSkills.length > 0
+          ? source.profile.heroSkills
+          : (defaultPortfolioContent.profile.heroSkills || defaultHeroSkills),
       },
       skills: source.skills || defaultPortfolioContent.skills,
       projects: source.projects || defaultPortfolioContent.projects,

@@ -138,16 +138,19 @@ export const Hero: React.FC = () => {
                 </div>
               </div>
               
+              {/* Highlight skills pills (Min 5, Max 20 dynamic skills) */}
               <div className="mt-3 flex flex-wrap gap-1.5 pt-3 border-t border-white/15">
-                <span className="rounded bg-black/40 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/10">
-                  Python &amp; SQL
-                </span>
-                <span className="rounded bg-black/40 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/10">
-                  Microsoft Power BI
-                </span>
-                <span className="rounded bg-black/40 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/10">
-                  Machine Learning
-                </span>
+                {(profile.heroSkills && profile.heroSkills.length > 0
+                  ? profile.heroSkills
+                  : ['Python & SQL', 'Microsoft Power BI', 'Machine Learning', 'Data Analysis & EDA', 'Artificial Intelligence']
+                ).map((skill, idx) => (
+                  <span
+                    key={`${skill}-${idx}`}
+                    className="rounded bg-black/50 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/15 shadow-sm hover:border-azure/50 hover:bg-black/70 transition-colors"
+                  >
+                    {skill}
+                  </span>
+                ))}
               </div>
             </div>
 
