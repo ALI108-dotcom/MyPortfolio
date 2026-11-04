@@ -28,12 +28,15 @@ import {
   RefreshCw,
   Mail,
   ExternalLink,
-  Tag
+  Tag,
+  Film,
+  Link
 } from 'lucide-react';
 import { parseVideoUrl } from '../utils/videoHelper';
 import { processImageFile } from '../utils/imageHelper';
 import profilePhoto from '../assets/profile.jpg';
 import { VideoStudioModal } from './VideoStudioModal';
+import { saveLocalVideoBlob } from '../utils/localVideoStorage';
 import { defaultStatsBar } from '../data/portfolioData';
 import { 
   SkillItem, 
@@ -127,6 +130,8 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
   const [newHeroSkillInput, setNewHeroSkillInput] = useState('');
   const [heroSkillError, setHeroSkillError] = useState<string | null>(null);
   const [showVideoStudioModal, setShowVideoStudioModal] = useState(false);
+  const [videoEditSourceMode, setVideoEditSourceMode] = useState<'local' | 'url' | 'camera'>('local');
+  const [videoStudioInitialTab, setVideoStudioInitialTab] = useState<'local' | 'url' | 'camera'>('local');
 
   const currentHeroSkills: string[] = (content.profile.heroSkills && content.profile.heroSkills.length > 0)
     ? content.profile.heroSkills
@@ -2090,15 +2095,15 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                       </div>
                     </div>
 
-                    {/* Dedicated Introduction Video Settings Card */}
+                    {/* Dedicated Introduction Video Settings Card (Edit or Update Video) */}
                     <div className="rounded-xl border border-happy-orange/30 bg-muted/20 p-4 sm:p-5 grand-shadow space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-3">
                         <div>
                           <span className="font-display text-base uppercase tracking-wider text-happy-orange flex items-center gap-2">
-                            <Video className="h-4 w-4" /> Introduction Video Settings
+                            <Video className="h-4 w-4" /> Edit &amp; Update Introduction Video
                           </span>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            Update the introduction video displayed on your homepage showcase.
+                            Update the video displayed on your homepage showcase via Computer, URL link, or Camera.
                           </p>
                         </div>
                         <span className="rounded bg-happy-orange/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-happy-orange border border-happy-orange/30 w-fit">
@@ -2106,44 +2111,170 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                         </span>
                       </div>
 
-                      {/* Multi-Source Video Studio Launch Banner */}
-                      <div className="rounded-lg bg-happy-orange/10 border border-happy-orange/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      {/* 1. THREE SECTION DROPDOWN SELECTOR */}
+                      <div className="bg-background/90 rounded-xl p-4 border border-happy-orange/30 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                          <p className="text-xs font-black uppercase tracking-wider text-happy-orange flex items-center gap-1.5">
-                            <Sparkles className="h-4 w-4" /> Any Video Source Supported
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Add URL links (YouTube, Google Drive, Loom), upload local video files from your laptop/phone, or record live using your camera!
+                          <label htmlFor="cms-video-mode-dropdown" className="text-xs font-black uppercase tracking-wider text-happy-orange flex items-center gap-1.5">
+                            <Film className="h-4 w-4" /> Choose Video Edit Source:
+                          </label>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            Select one of the 3 formats to open that specific role below.
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setShowVideoStudioModal(true)}
-                          className="shrink-0 flex items-center gap-2 rounded-lg bg-happy-orange hover:bg-happy-orange/90 text-foreground px-4 py-2.5 text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer"
-                        >
-                          <Video className="h-4 w-4" />
-                          <span>Open Video Studio</span>
-                        </button>
+
+                        <div className="relative min-w-[280px]">
+                          <select
+                            id="cms-video-mode-dropdown"
+                            value={videoEditSourceMode}
+                            onChange={(e) => {
+                              const val = e.target.value as 'local' | 'url' | 'camera';
+                              setVideoEditSourceMode(val);
+                              setVideoStudioInitialTab(val);
+                            }}
+                            className="w-full rounded-lg border-2 border-happy-orange bg-card px-4 py-2.5 text-xs font-black uppercase tracking-wider text-foreground focus:outline-none focus:ring-2 focus:ring-happy-orange cursor-pointer shadow-md"
+                          >
+                            <option value="local">💻 1. Select Video from Computer</option>
+                            <option value="url">🌐 2. Add Video via URL Link (YouTube / Drive)</option>
+                            <option value="camera">📹 3. Record Camera Video (Webcam / Phone)</option>
+                          </select>
+                        </div>
                       </div>
 
-                      <div className="rounded-lg bg-azure/10 border border-azure/20 p-3 text-xs text-azure leading-relaxed">
-                        <strong>Quick URL Input:</strong> You can paste any standard YouTube link, YouTube Short, Vimeo link, Google Drive link, or direct MP4 link below, or click <strong>Open Video Studio</strong> above for local file uploads and live camera recording.
-                      </div>
+                      {/* 2. PARTICULAR ROLE RENDERED BASED ON DROPDOWN SELECTION */}
+                      {/* ROLE A: SELECT VIDEO FROM COMPUTER */}
+                      {videoEditSourceMode === 'local' && (
+                        <div className="rounded-xl bg-azure/10 border border-azure/30 p-4 space-y-3.5 animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black uppercase tracking-wider text-azure flex items-center gap-2">
+                              <Upload className="h-4 w-4" /> Role: Select Video from Computer
+                            </span>
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                              MP4, WebM, MOV, MKV
+                            </span>
+                          </div>
 
-                      <div>
-                        <label className="block text-xs font-bold uppercase text-foreground mb-1">
-                          Video URL Link * (YouTube / Vimeo / MP4)
-                        </label>
-                        <input
-                          type="url"
-                          placeholder="e.g. https://www.youtube.com/watch?v=xC-c7E5PK0Y"
-                          value={content.profile.introVideoUrl || ''}
-                          onChange={(e) => updateProfile({ introVideoUrl: e.target.value })}
-                          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure"
-                        />
-                      </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            Click <strong>Select Video from Computer</strong> below to open your File Explorer and choose any video from your PC or mobile phone.
+                          </p>
 
-                      <div className="grid sm:grid-cols-2 gap-4">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <label className="cursor-pointer inline-flex items-center gap-2 rounded-md bg-azure text-white px-5 py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 shadow-md transition-all hover:scale-105 active:scale-95">
+                              <Upload className="h-4 w-4" />
+                              <span>Select Video from Computer</span>
+                              <input
+                                type="file"
+                                accept="video/*,.mp4,.webm,.mov,.mkv,.m4v,.avi"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  try {
+                                    const { objectUrl, base64Url } = await saveLocalVideoBlob(file, {
+                                      title: content.profile.introVideoTitle || file.name.replace(/\.[^/.]+$/, ''),
+                                      duration: content.profile.introVideoDuration || '~3 Min',
+                                      filename: file.name,
+                                      sourceType: 'local',
+                                    });
+                                    updateProfile({
+                                      introVideoUrl: base64Url || objectUrl,
+                                    });
+                                    alert(`Video "${file.name}" selected from computer! Click "Save Changes" at the bottom to persist.`);
+                                  } catch (err: any) {
+                                    alert('Failed to process video: ' + err.message);
+                                  }
+                                }}
+                              />
+                            </label>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVideoStudioInitialTab('local');
+                                setShowVideoStudioModal(true);
+                              }}
+                              className="inline-flex items-center gap-1.5 rounded-md border border-azure/40 bg-azure/15 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-azure hover:bg-azure/25 cursor-pointer transition-colors"
+                            >
+                              <Video className="h-4 w-4" />
+                              <span>Open Local Video Studio</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ROLE B: ADD VIDEO VIA URL LINK */}
+                      {videoEditSourceMode === 'url' && (
+                        <div className="rounded-xl bg-happy-orange/10 border border-happy-orange/30 p-4 space-y-3.5 animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black uppercase tracking-wider text-happy-orange flex items-center gap-2">
+                              <Link className="h-4 w-4" /> Role: Add Video via URL Link
+                            </span>
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                              YouTube, Google Drive, Vimeo, MP4
+                            </span>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold uppercase text-foreground mb-1.5">
+                              Paste Video URL Link *
+                            </label>
+                            <input
+                              type="url"
+                              placeholder="e.g. https://www.youtube.com/watch?v=... or https://drive.google.com/..."
+                              value={content.profile.introVideoUrl || ''}
+                              onChange={(e) => updateProfile({ introVideoUrl: e.target.value })}
+                              className="w-full rounded-md border border-border bg-background px-3.5 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-happy-orange"
+                            />
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[11px] font-bold text-muted-foreground uppercase">Presets:</span>
+                            <button
+                              type="button"
+                              onClick={() => updateProfile({
+                                introVideoUrl: 'https://www.youtube.com/watch?v=xC-c7E5PK0Y',
+                                introVideoTitle: 'Introduction & Technical Learning Journey',
+                                introVideoDuration: '3 Min (3–13 Min Allowed)'
+                              })}
+                              className="rounded-full bg-muted/60 hover:bg-muted text-foreground text-[10px] font-bold px-3 py-1 border border-border transition-colors cursor-pointer"
+                            >
+                              Reset to Default YouTube
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ROLE C: RECORD CAMERA VIDEO */}
+                      {videoEditSourceMode === 'camera' && (
+                        <div className="rounded-xl bg-coral/10 border border-coral/30 p-4 space-y-3.5 animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black uppercase tracking-wider text-coral flex items-center gap-2">
+                              <Camera className="h-4 w-4" /> Role: Record Camera Video
+                            </span>
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                              Live Webcam &amp; Mobile Camera
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            Click <strong>Open Camera Recording Studio</strong> to turn on your webcam or mobile camera, switch front/back lenses, and record live.
+                          </p>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVideoStudioInitialTab('camera');
+                              setShowVideoStudioModal(true);
+                            }}
+                            className="inline-flex items-center gap-2 rounded-md bg-coral text-white font-black px-5 py-2.5 text-xs uppercase tracking-wider hover:opacity-90 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                          >
+                            <Camera className="h-4 w-4" />
+                            <span>Open Camera Recording Studio</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Common Title & Duration Inputs */}
+                      <div className="grid sm:grid-cols-2 gap-4 pt-2 border-t border-border/60">
                         <div>
                           <label className="block text-xs font-bold uppercase text-foreground mb-1">
                             Video Title / Heading
@@ -2348,6 +2479,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
       {/* Video Studio Modal for URL, Local Files, and Camera */}
       <VideoStudioModal
         isOpen={showVideoStudioModal}
+        initialTab={videoStudioInitialTab}
         onClose={() => setShowVideoStudioModal(false)}
       />
     </div>

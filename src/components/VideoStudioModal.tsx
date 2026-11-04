@@ -22,15 +22,16 @@ import { saveLocalVideoBlob } from '../utils/localVideoStorage';
 
 interface VideoStudioModalProps {
   isOpen: boolean;
+  initialTab?: 'url' | 'local' | 'camera';
   onClose: () => void;
 }
 
-export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, onClose }) => {
+export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, initialTab, onClose }) => {
   const { content, updateProfile, saveChanges } = usePortfolio();
   const profile = content.profile;
 
-  // Tabs: 'url' | 'local' | 'camera'
-  const [activeTab, setActiveTab] = useState<'url' | 'local' | 'camera'>('url');
+  // Tabs: 'local' | 'url' | 'camera'
+  const [activeTab, setActiveTab] = useState<'url' | 'local' | 'camera'>(initialTab || 'local');
 
   // URL state
   const [urlInput, setUrlInput] = useState<string>(profile.introVideoUrl || '');
@@ -69,6 +70,12 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, onCl
   // Sync inputs on open
   useEffect(() => {
     if (isOpen) {
+      if (initialTab) {
+        setActiveTab(initialTab);
+        if (initialTab === 'camera') {
+          startCameraStream();
+        }
+      }
       setUrlInput(profile.introVideoUrl || '');
       setVideoTitle(profile.introVideoTitle || 'Introduction & Technical Learning Journey');
       setVideoDuration(profile.introVideoDuration || '~3 Min (3–13 Min Allowed)');
@@ -77,7 +84,7 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, onCl
       // Clean up camera stream if modal is closed
       stopCameraStream();
     }
-  }, [isOpen, profile]);
+  }, [isOpen, initialTab, profile]);
 
   // Clean up when switching away from camera tab
   useEffect(() => {
@@ -413,30 +420,69 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, onCl
           </button>
         </div>
 
-        {/* Tab Selection */}
-        <div className="grid grid-cols-3 border-b border-border bg-muted/30 p-2 gap-2 text-xs font-bold uppercase">
-          <button
-            onClick={() => setActiveTab('url')}
-            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer ${
-              activeTab === 'url'
-                ? 'bg-azure text-white shadow-md'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-            }`}
-          >
-            <Link className="h-4 w-4" />
-            <span>URL Links</span>
-          </button>
+        {/* DROPDOWN SELECTOR FORMAT (Switch between Computer, URL, and Camera) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border bg-muted/40 p-3.5 px-5">
+          <div className="flex items-center gap-2">
+            <label htmlFor="video-mode-select" className="text-xs font-black uppercase tracking-wider text-happy-orange flex items-center gap-1.5">
+              <span>Select Video Option (Dropdown):</span>
+            </label>
+            <span className="text-[11px] text-muted-foreground hidden sm:inline">
+              (Select an option to open that particular role)
+            </span>
+          </div>
 
+          <div className="relative min-w-[280px]">
+            <select
+              id="video-mode-select"
+              value={activeTab}
+              onChange={(e) => {
+                const newTab = e.target.value as 'local' | 'url' | 'camera';
+                setActiveTab(newTab);
+                if (newTab === 'camera') {
+                  startCameraStream();
+                } else {
+                  stopCameraStream();
+                }
+              }}
+              className="w-full rounded-lg border-2 border-happy-orange bg-background px-3.5 py-2 text-xs font-black uppercase tracking-wider text-foreground focus:outline-none focus:ring-2 focus:ring-happy-orange cursor-pointer shadow-sm"
+            >
+              <option value="local">💻 Select Video from Computer</option>
+              <option value="url">🌐 Add Video via URL Link (YouTube / Drive / Vimeo)</option>
+              <option value="camera">📹 Record Camera Video (Webcam / Mobile Camera)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Quick Tab Buttons */}
+        <div className="grid grid-cols-3 border-b border-border bg-muted/20 p-2 gap-2 text-xs font-bold uppercase">
           <button
-            onClick={() => setActiveTab('local')}
-            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer ${
+            onClick={() => {
+              setActiveTab('local');
+              stopCameraStream();
+            }}
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all cursor-pointer ${
               activeTab === 'local'
-                ? 'bg-happy-orange text-foreground font-black shadow-md'
+                ? 'bg-azure text-white font-black shadow-md'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
             }`}
           >
             <Upload className="h-4 w-4" />
-            <span>Local Video File</span>
+            <span>1. From Computer</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('url');
+              stopCameraStream();
+            }}
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+              activeTab === 'url'
+                ? 'bg-happy-orange text-foreground font-black shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            }`}
+          >
+            <Link className="h-4 w-4" />
+            <span>2. URL Link</span>
           </button>
 
           <button
@@ -446,14 +492,14 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, onCl
                 startCameraStream();
               }
             }}
-            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all cursor-pointer ${
               activeTab === 'camera'
-                ? 'bg-coral text-white shadow-md'
+                ? 'bg-coral text-white font-black shadow-md'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
             }`}
           >
             <Camera className="h-4 w-4" />
-            <span>Record Camera</span>
+            <span>3. Camera Video</span>
           </button>
         </div>
 
@@ -581,6 +627,24 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, onCl
                 className="hidden"
               />
 
+              {/* Action Button: SELECT VIDEO FROM COMPUTER */}
+              <div className="flex flex-wrap items-center justify-center gap-3 py-2">
+                <label className="cursor-pointer inline-flex items-center gap-2 rounded-md bg-azure text-white px-5 py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 shadow-md transition-all hover:scale-105 active:scale-95">
+                  <Upload className="h-4 w-4" />
+                  <span>Select Video from Computer</span>
+                  <input
+                    type="file"
+                    accept="video/*,.mp4,.webm,.mov,.mkv,.m4v,.avi"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleLocalFileSelect(e.target.files[0]);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+
               {/* Drop / Click Box */}
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -591,15 +655,15 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, onCl
                     handleLocalFileSelect(e.dataTransfer.files[0]);
                   }
                 }}
-                className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-happy-orange/40 hover:border-happy-orange rounded-xl bg-happy-orange/5 hover:bg-happy-orange/10 transition-all cursor-pointer text-center group"
+                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-happy-orange/40 hover:border-happy-orange rounded-xl bg-happy-orange/5 hover:bg-happy-orange/10 transition-all cursor-pointer text-center group"
               >
-                <div className="grid h-12 w-12 place-items-center rounded-full bg-happy-orange/20 text-happy-orange mb-3 group-hover:scale-110 transition-transform">
-                  <Upload className="h-6 w-6" />
+                <div className="grid h-10 w-10 place-items-center rounded-full bg-happy-orange/20 text-happy-orange mb-2 group-hover:scale-110 transition-transform">
+                  <Upload className="h-5 w-5" />
                 </div>
-                <p className="text-sm font-bold text-foreground">
-                  Click to Browse or Drag &amp; Drop Video Here
+                <p className="text-xs font-bold text-foreground">
+                  Or Drag &amp; Drop Video File Here
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-[11px] text-muted-foreground mt-0.5">
                   Supports MP4, WebM, MOV, MKV from your PC or mobile gallery
                 </p>
               </div>

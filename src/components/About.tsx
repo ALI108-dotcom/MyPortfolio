@@ -194,6 +194,7 @@ export const About: React.FC = () => {
   const [editingPillar, setEditingPillar] = useState<AboutPillar | null>(null);
   const [showAddPillar, setShowAddPillar] = useState(false);
   const [showVideoStudio, setShowVideoStudio] = useState(false);
+  const [videoStudioTab, setVideoStudioTab] = useState<'local' | 'url' | 'camera'>('local');
   const [saving, setSaving] = useState(false);
 
   const videoInfo = parseVideoUrl(profile.introVideoUrl);
@@ -239,27 +240,35 @@ export const About: React.FC = () => {
               {activeMediaTab === 'video' ? '01/10 INTRODUCTION VIDEO' : '01/10 ANALYTICAL PHILOSOPHY'}
             </span>
 
-            {/* Toggle Switch & Video Studio Edit Button */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  if (isEditMode) {
-                    setShowVideoStudio(true);
-                  } else {
-                    const pass = window.prompt('Enter admin password to edit video:');
-                    if (pass === 'shaik2028') {
-                      login(pass).then(() => setShowVideoStudio(true));
-                    } else if (pass) {
-                      alert('Incorrect password.');
+            {/* Toggle Switch & Video Studio Edit Dropdown */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="relative">
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const mode = e.target.value as 'local' | 'url' | 'camera';
+                    if (!mode) return;
+                    setVideoStudioTab(mode);
+                    if (isEditMode) {
+                      setShowVideoStudio(true);
+                    } else {
+                      const pass = window.prompt('Enter admin password to edit video:');
+                      if (pass === 'shaik2028') {
+                        login(pass).then(() => setShowVideoStudio(true));
+                      } else if (pass) {
+                        alert('Incorrect password.');
+                      }
                     }
-                  }
-                }}
-                className="flex items-center gap-1 rounded-full bg-happy-orange/20 hover:bg-happy-orange/35 text-happy-orange px-2.5 py-1 text-[10px] font-black uppercase tracking-wider border border-happy-orange/40 transition-all cursor-pointer shadow-sm"
-                title="Edit Video (URL, Local Video File, or Camera Recording)"
-              >
-                <Video className="h-3 w-3" />
-                <span>Edit Video</span>
-              </button>
+                  }}
+                  className="rounded-full bg-happy-orange/20 hover:bg-happy-orange/35 text-happy-orange px-2.5 py-1 text-[10px] font-black uppercase tracking-wider border border-happy-orange/40 transition-all cursor-pointer shadow-sm outline-none"
+                  title="Choose video option to edit: Local video from computer, URL link, or Camera video"
+                >
+                  <option value="" disabled>🎬 Edit Video (Choose Source) ▼</option>
+                  <option value="local">💻 Select Video from Computer</option>
+                  <option value="url">🌐 Add Video via URL Link</option>
+                  <option value="camera">📹 Record Camera Video</option>
+                </select>
+              </div>
 
               <button
                 onClick={() => setActiveMediaTab('video')}
@@ -372,26 +381,33 @@ export const About: React.FC = () => {
           <div className="relative z-10 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-white/70">
             <span>Focus: What I Know &amp; What I Have Built</span>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (isEditMode) {
-                    setShowVideoStudio(true);
-                  } else {
-                    const pass = window.prompt('Enter admin password to edit video:');
-                    if (pass === 'shaik2028') {
-                      login(pass).then(() => setShowVideoStudio(true));
-                    } else if (pass) {
-                      alert('Incorrect password.');
+              <div className="relative">
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const mode = e.target.value as 'local' | 'url' | 'camera';
+                    if (!mode) return;
+                    setVideoStudioTab(mode);
+                    if (isEditMode) {
+                      setShowVideoStudio(true);
+                    } else {
+                      const pass = window.prompt('Enter admin password to edit video:');
+                      if (pass === 'shaik2028') {
+                        login(pass).then(() => setShowVideoStudio(true));
+                      } else if (pass) {
+                        alert('Incorrect password.');
+                      }
                     }
-                  }
-                }}
-                className="rounded bg-happy-orange/20 hover:bg-happy-orange/30 text-happy-orange px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border border-happy-orange/30 transition-all cursor-pointer flex items-center gap-1"
-                title="Add or Change Video: URL links, Local video files, or Camera recording"
-              >
-                <Video className="h-3 w-3" />
-                <span>+ Edit Video (URL / Local / Camera)</span>
-              </button>
+                  }}
+                  className="rounded bg-happy-orange/20 hover:bg-happy-orange/30 text-happy-orange px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border border-happy-orange/40 transition-all cursor-pointer outline-none"
+                  title="Choose video option to edit: Computer, URL, or Camera"
+                >
+                  <option value="" disabled>+ Edit Video (Choose Option) ▼</option>
+                  <option value="local">💻 Select Video from Computer</option>
+                  <option value="url">🌐 Add Video via URL Link</option>
+                  <option value="camera">📹 Record Camera Video</option>
+                </select>
+              </div>
 
               <span className="text-malachite font-bold uppercase text-[11px] flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-malachite animate-pulse" />
@@ -488,6 +504,7 @@ export const About: React.FC = () => {
       {/* Intro Video Studio Modal (Supports URL links, Local files, and Camera Recording) */}
       <VideoStudioModal
         isOpen={showVideoStudio}
+        initialTab={videoStudioTab}
         onClose={() => setShowVideoStudio(false)}
       />
     </section>
