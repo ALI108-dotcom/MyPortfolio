@@ -16,6 +16,7 @@ import {
 } from '../types';
 import { defaultPortfolioContent, defaultStatsBar, defaultFocusTracks, defaultAboutPillars, defaultHeroSkills } from '../data/portfolioData';
 import { supabase } from '../lib/supabase';
+import { loadLocalVideoBlob } from '../utils/localVideoStorage';
 
 interface PortfolioContextType {
   content: PortfolioContent;
@@ -251,6 +252,24 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
           const merged = sanitizeAndMerge(parsed);
           setContent(merged);
           setSavedBaseline(merged);
+        }
+      } catch (e) {
+        // Fallback silently
+      }
+
+      // 3.5 Check for local video stored in IndexedDB on this device
+      try {
+        const localVid = await loadLocalVideoBlob();
+        if (localVid && localVid.objectUrl) {
+          setContent((prev) => ({
+            ...prev,
+            profile: {
+              ...prev.profile,
+              introVideoUrl: localVid.objectUrl,
+              introVideoTitle: localVid.meta?.title || prev.profile.introVideoTitle,
+              introVideoDuration: localVid.meta?.duration || prev.profile.introVideoDuration,
+            },
+          }));
         }
       } catch (e) {
         // Fallback silently

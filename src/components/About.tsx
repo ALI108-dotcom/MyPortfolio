@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Database, LineChart, Binary, Compass, Video, Edit2, Save, Plus, Trash2, X, CheckCircle } from 'lucide-react';
+import { Database, LineChart, Binary, Compass, Video, Edit2, Save, Plus, Trash2, X, CheckCircle, Film } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { parseVideoUrl } from '../utils/videoHelper';
 import { AboutPillar } from '../types';
 import { defaultAboutPillars } from '../data/portfolioData';
+import { VideoStudioModal } from './VideoStudioModal';
 
 // Pillar border color options
 const pillarBorderOptions = [
@@ -187,11 +188,12 @@ const AddPillarModal: React.FC<AddPillarModalProps> = ({ onSave, onClose, nextNu
 };
 
 export const About: React.FC = () => {
-  const { content, isEditMode, updateAboutPillar, addAboutPillar, deleteAboutPillar, saveChanges } = usePortfolio();
+  const { content, isEditMode, login, updateAboutPillar, addAboutPillar, deleteAboutPillar, saveChanges } = usePortfolio();
   const profile = content.profile;
   const [activeMediaTab, setActiveMediaTab] = useState<'video' | 'philosophy'>('video');
   const [editingPillar, setEditingPillar] = useState<AboutPillar | null>(null);
   const [showAddPillar, setShowAddPillar] = useState(false);
+  const [showVideoStudio, setShowVideoStudio] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const videoInfo = parseVideoUrl(profile.introVideoUrl);
@@ -237,8 +239,28 @@ export const About: React.FC = () => {
               {activeMediaTab === 'video' ? '01/10 INTRODUCTION VIDEO' : '01/10 ANALYTICAL PHILOSOPHY'}
             </span>
 
-            {/* Toggle Switch */}
+            {/* Toggle Switch & Video Studio Edit Button */}
             <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  if (isEditMode) {
+                    setShowVideoStudio(true);
+                  } else {
+                    const pass = window.prompt('Enter admin password to edit video:');
+                    if (pass === 'shaik2028') {
+                      login(pass).then(() => setShowVideoStudio(true));
+                    } else if (pass) {
+                      alert('Incorrect password.');
+                    }
+                  }
+                }}
+                className="flex items-center gap-1 rounded-full bg-happy-orange/20 hover:bg-happy-orange/35 text-happy-orange px-2.5 py-1 text-[10px] font-black uppercase tracking-wider border border-happy-orange/40 transition-all cursor-pointer shadow-sm"
+                title="Edit Video (URL, Local Video File, or Camera Recording)"
+              >
+                <Video className="h-3 w-3" />
+                <span>Edit Video</span>
+              </button>
+
               <button
                 onClick={() => setActiveMediaTab('video')}
                 className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
@@ -272,6 +294,7 @@ export const About: React.FC = () => {
                   <video
                     src={videoInfo.embedUrl}
                     controls
+                    playsInline
                     className="w-full h-full object-contain"
                     preload="metadata"
                   >
@@ -286,6 +309,28 @@ export const About: React.FC = () => {
                     allowFullScreen
                   />
                 )}
+
+                {/* Quick Edit Overlay Button on Hover */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isEditMode) {
+                      setShowVideoStudio(true);
+                    } else {
+                      const pass = window.prompt('Enter admin password to edit video:');
+                      if (pass === 'shaik2028') {
+                        login(pass).then(() => setShowVideoStudio(true));
+                      } else if (pass) {
+                        alert('Incorrect password.');
+                      }
+                    }
+                  }}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-happy-orange text-white hover:text-foreground text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border border-white/20 shadow-md flex items-center gap-1.5 cursor-pointer z-20 backdrop-blur-sm"
+                  title="Change video to URL, Local File, or Camera Recording"
+                >
+                  <Film className="h-3 w-3" />
+                  <span>Change Video</span>
+                </button>
               </div>
 
               {/* Video Title / Status Caption */}
@@ -327,11 +372,27 @@ export const About: React.FC = () => {
           <div className="relative z-10 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-white/70">
             <span>Focus: What I Know &amp; What I Have Built</span>
             <div className="flex items-center gap-2">
-              {isEditMode && (
-                <span className="rounded bg-azure/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-azure border border-azure/30">
-                  Edit Video in CMS (Ctrl+Shift+E)
-                </span>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (isEditMode) {
+                    setShowVideoStudio(true);
+                  } else {
+                    const pass = window.prompt('Enter admin password to edit video:');
+                    if (pass === 'shaik2028') {
+                      login(pass).then(() => setShowVideoStudio(true));
+                    } else if (pass) {
+                      alert('Incorrect password.');
+                    }
+                  }
+                }}
+                className="rounded bg-happy-orange/20 hover:bg-happy-orange/30 text-happy-orange px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border border-happy-orange/30 transition-all cursor-pointer flex items-center gap-1"
+                title="Add or Change Video: URL links, Local video files, or Camera recording"
+              >
+                <Video className="h-3 w-3" />
+                <span>+ Edit Video (URL / Local / Camera)</span>
+              </button>
+
               <span className="text-malachite font-bold uppercase text-[11px] flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-malachite animate-pulse" />
                 {activeMediaTab === 'video' ? 'Interactive Video' : 'Active Pair Programming'}
@@ -423,6 +484,12 @@ export const About: React.FC = () => {
           onClose={() => setShowAddPillar(false)}
         />
       )}
+
+      {/* Intro Video Studio Modal (Supports URL links, Local files, and Camera Recording) */}
+      <VideoStudioModal
+        isOpen={showVideoStudio}
+        onClose={() => setShowVideoStudio(false)}
+      />
     </section>
   );
 };

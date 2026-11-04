@@ -33,6 +33,7 @@ import {
 import { parseVideoUrl } from '../utils/videoHelper';
 import { processImageFile } from '../utils/imageHelper';
 import profilePhoto from '../assets/profile.jpg';
+import { VideoStudioModal } from './VideoStudioModal';
 import { defaultStatsBar } from '../data/portfolioData';
 import { 
   SkillItem, 
@@ -125,6 +126,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
   // Hero highlight pills state (Min 5, Max 20 skills)
   const [newHeroSkillInput, setNewHeroSkillInput] = useState('');
   const [heroSkillError, setHeroSkillError] = useState<string | null>(null);
+  const [showVideoStudioModal, setShowVideoStudioModal] = useState(false);
 
   const currentHeroSkills: string[] = (content.profile.heroSkills && content.profile.heroSkills.length > 0)
     ? content.profile.heroSkills
@@ -2104,8 +2106,28 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                         </span>
                       </div>
 
+                      {/* Multi-Source Video Studio Launch Banner */}
+                      <div className="rounded-lg bg-happy-orange/10 border border-happy-orange/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-wider text-happy-orange flex items-center gap-1.5">
+                            <Sparkles className="h-4 w-4" /> Any Video Source Supported
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Add URL links (YouTube, Google Drive, Loom), upload local video files from your laptop/phone, or record live using your camera!
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowVideoStudioModal(true)}
+                          className="shrink-0 flex items-center gap-2 rounded-lg bg-happy-orange hover:bg-happy-orange/90 text-foreground px-4 py-2.5 text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer"
+                        >
+                          <Video className="h-4 w-4" />
+                          <span>Open Video Studio</span>
+                        </button>
+                      </div>
+
                       <div className="rounded-lg bg-azure/10 border border-azure/20 p-3 text-xs text-azure leading-relaxed">
-                        <strong>Format Instructions:</strong> Enter only the video URL link. You can paste any standard YouTube link (e.g. <code>https://www.youtube.com/watch?v=...</code>), YouTube Short, Vimeo link, or direct MP4 link. Video must be a minimum of 3 minutes and a maximum of 13 minutes.
+                        <strong>Quick URL Input:</strong> You can paste any standard YouTube link, YouTube Short, Vimeo link, Google Drive link, or direct MP4 link below, or click <strong>Open Video Studio</strong> above for local file uploads and live camera recording.
                       </div>
 
                       <div>
@@ -2322,6 +2344,12 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
         </div>
 
       </div>
+
+      {/* Video Studio Modal for URL, Local Files, and Camera */}
+      <VideoStudioModal
+        isOpen={showVideoStudioModal}
+        onClose={() => setShowVideoStudioModal(false)}
+      />
     </div>
   );
 };
