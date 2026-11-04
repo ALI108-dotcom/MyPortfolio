@@ -121,28 +121,32 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLogin, onOpenEditor }) => 
             <ArrowRight className="h-3 w-3 xl:h-3.5 xl:w-3.5 text-azure" aria-hidden="true" />
           </a>
 
-          {/* Quick Edit Trigger */}
-          <button
-            onClick={isEditMode ? onOpenEditor : onOpenLogin}
-            title={isEditMode ? 'Open CMS Dashboard' : 'Login to Edit Mode'}
-            className="ml-2 inline-flex items-center justify-center h-8 w-8 rounded-md border border-border text-muted-foreground hover:text-happy-orange hover:border-happy-orange/40 transition-colors cursor-pointer"
-          >
-            <Edit3 className="h-3.5 w-3.5" />
-          </button>
+          {/* Quick Edit Trigger (Strictly for Authenticated Admin) */}
+          {isEditMode && (
+            <button
+              onClick={onOpenEditor}
+              title="Open CMS Dashboard"
+              className="ml-2 inline-flex items-center justify-center h-8 w-8 rounded-md border border-happy-orange/50 bg-happy-orange/15 text-happy-orange hover:bg-happy-orange/25 transition-colors cursor-pointer"
+            >
+              <Edit3 className="h-3.5 w-3.5" />
+            </button>
+          )}
         </nav>
 
         {/* Mobile / Tablet controls (visible on screens < lg) */}
         <div className="flex shrink-0 items-center gap-2 lg:hidden">
-          {/* Direct Mobile Edit Button */}
-          <button
-            onClick={isEditMode ? onOpenEditor : onOpenLogin}
-            title={isEditMode ? 'Open CMS Dashboard' : 'Edit Portfolio (Mobile)'}
-            aria-label={isEditMode ? 'Open CMS Dashboard' : 'Edit Portfolio (Mobile)'}
-            className="inline-flex items-center justify-center gap-1 h-8 rounded-md border border-happy-orange/50 bg-happy-orange/15 px-2.5 text-[11px] font-bold uppercase tracking-wider text-happy-orange cursor-pointer hover:bg-happy-orange/25 transition-colors"
-          >
-            <Edit3 className="h-3.5 w-3.5" />
-            <span>{isEditMode ? 'CMS' : 'Edit'}</span>
-          </button>
+          {/* Direct Mobile Edit Button (Strictly for Authenticated Admin) */}
+          {isEditMode && (
+            <button
+              onClick={onOpenEditor}
+              title="Open CMS Dashboard"
+              aria-label="Open CMS Dashboard"
+              className="inline-flex items-center justify-center gap-1 h-8 rounded-md border border-happy-orange/50 bg-happy-orange/15 px-2.5 text-[11px] font-bold uppercase tracking-wider text-happy-orange cursor-pointer hover:bg-happy-orange/25 transition-colors"
+            >
+              <Edit3 className="h-3.5 w-3.5" />
+              <span>CMS</span>
+            </button>
+          )}
 
           <a
             href="#contact"
@@ -206,21 +210,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLogin, onOpenEditor }) => 
                 <ArrowRight className="h-3.5 w-3.5 text-azure" />
               </a>
 
-              {/* Mobile Edit Mode Button */}
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  if (isEditMode) {
-                    onOpenEditor?.();
-                  } else {
-                    onOpenLogin?.();
-                  }
-                }}
-                className="mt-2 flex items-center justify-center gap-2 rounded-md bg-happy-orange/15 border border-happy-orange/50 text-happy-orange py-2.5 text-xs font-bold uppercase tracking-widest hover:bg-happy-orange/25 transition-all cursor-pointer"
-              >
-                <Edit3 className="h-4 w-4" />
-                {isEditMode ? 'Open CMS Dashboard' : 'Edit Mode (Admin Login)'}
-              </button>
+              {/* Discrete Admin Link */}
+              <div className="pt-2 text-center border-t border-border/50">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (isEditMode) {
+                      onOpenEditor?.();
+                    } else {
+                      onOpenLogin?.();
+                    }
+                  }}
+                  className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+                >
+                  {isEditMode ? '⚙️ Admin CMS Active' : 'Admin Portal'}
+                </button>
+              </div>
             </div>
           </nav>
         </div>

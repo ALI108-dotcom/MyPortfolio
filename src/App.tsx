@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { LayoutDashboard } from 'lucide-react';
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -29,7 +30,7 @@ const PortfolioLayout: React.FC = () => {
     // Check if URL contains #edit (ideal for mobile bookmarking / sharing)
     if (typeof window !== 'undefined') {
       const checkUrlEdit = () => {
-        if (window.location.hash === '#edit' || window.location.search.includes('edit=true')) {
+        if (window.location.hash === '#edit' || window.location.hash === '#admin' || window.location.search.includes('edit=true')) {
           if (isEditMode) {
             setEditorModalOpen(true);
           } else {
@@ -82,6 +83,23 @@ const PortfolioLayout: React.FC = () => {
     <div className="seva-landing relative isolate flex min-h-screen flex-col bg-background text-foreground overflow-x-hidden w-full">
       {/* Authenticated Edit Mode Admin Toolbar - STRICTLY visible only when isEditMode === true */}
       {isEditMode && <EditToolbar onOpenQuickEdit={() => setEditorModalOpen(true)} />}
+
+      {/* Mobile Floating Admin Bar: strictly when authenticated on mobile */}
+      {isEditMode && (
+        <aside className="fixed bottom-4 inset-x-4 z-40 lg:hidden flex items-center justify-between gap-2 rounded-xl bg-foreground/95 text-white p-2.5 shadow-2xl border border-happy-orange/50 backdrop-blur-md animate-in slide-in-from-bottom duration-300">
+          <div className="flex items-center gap-2 pl-2">
+            <span className="h-2 w-2 rounded-full bg-happy-orange animate-ping" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-happy-orange">Admin Active</span>
+          </div>
+          <button
+            onClick={() => setEditorModalOpen(true)}
+            className="flex items-center gap-1.5 rounded-lg grad-ink px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow cursor-pointer"
+          >
+            <LayoutDashboard className="h-3.5 w-3.5 text-azure" />
+            <span>Open CMS</span>
+          </button>
+        </aside>
+      )}
 
       {/* Top Sticky Header */}
       <Header

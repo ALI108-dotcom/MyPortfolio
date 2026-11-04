@@ -15,6 +15,7 @@ import {
   AboutPillar
 } from '../types';
 import { defaultPortfolioContent, defaultStatsBar, defaultFocusTracks, defaultAboutPillars, defaultHeroSkills } from '../data/portfolioData';
+import { supabase } from '../lib/supabase';
 
 interface PortfolioContextType {
   content: PortfolioContent;
@@ -23,6 +24,8 @@ interface PortfolioContextType {
   hasUnsavedChanges: boolean;
   authToken: string | null;
   isCloudSynced: boolean;
+  cloudStatus: 'connected' | 'offline' | 'checking';
+  checkCloudStatus: () => Promise<boolean>;
   getSyncUrl: () => string;
   forceSyncToLatestDefaults: () => void;
   login: (password: string) => Promise<{ success: boolean; error?: string }>;
@@ -103,6 +106,24 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isCloudSynced, setIsCloudSynced] = useState<boolean>(false);
+  const [cloudStatus, setCloudStatus] = useState<'connected' | 'offline' | 'checking'>('checking');
+
+  const checkCloudStatus = async (): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/content?_t=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data.isCloud) {
+          setCloudStatus('connected');
+          setIsCloudSynced(true);
+          return true;
+        }
+      }
+    } catch {}
+    setCloudStatus('offline');
+    setIsCloudSynced(false);
+    return false;
+  };
 
   const lastCloudUpdatedRef = React.useRef<string | null>(null);
   const hasUnsavedChangesRef = React.useRef<boolean>(false);
@@ -271,11 +292,49 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
       }
     } catch {}
 
+    // 7. Supabase Realtime WebSocket subscription
+    let realtimeChannel: any = null;
+    try {
+      if (supabase) {
+        realtimeChannel = supabase
+          .channel('public_portfolio_content_realtime')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'portfolio_content' },
+            (payload) => {
+              if (payload.new && (payload.new as any).content) {
+                if (!hasUnsavedChangesRef.current) {
+                  const incoming = (payload.new as any).content;
+                  const merged = sanitizeAndMerge(incoming);
+                  setContent(merged);
+                  setSavedBaseline(merged);
+                  setIsCloudSynced(true);
+                  setCloudStatus('connected');
+                  try {
+                    localStorage.setItem('shaik_portfolio_content', JSON.stringify(merged));
+                    localStorage.setItem('shaik_portfolio_content_v2', JSON.stringify(merged));
+                  } catch {}
+                }
+              }
+            }
+          )
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              setCloudStatus('connected');
+              setIsCloudSynced(true);
+            }
+          });
+      }
+    } catch (e) {
+      console.warn('Realtime subscription error:', e);
+    }
+
     return () => {
       clearInterval(pollTimer);
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibility);
       channel?.close();
+      realtimeChannel?.unsubscribe();
     };
   }, []);
 
@@ -824,6 +883,8 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         hasUnsavedChanges,
         authToken,
         isCloudSynced,
+        cloudStatus,
+        checkCloudStatus,
         getSyncUrl,
         forceSyncToLatestDefaults,
         login,

@@ -41,9 +41,19 @@ export default async function handler(req, res) {
 
   const supabaseKey = rawSupabaseKey ? rawSupabaseKey.trim() : null;
 
-  // 2. Fallback: Vercel KV / Upstash
-  const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Helper with AbortController timeout (prevents long hanging connections)
+  const fetchWithTimeout = async (url, options = {}, timeoutMs = 4500) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const resp = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return resp;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
+  };
 
   // --------------------------------------------------------------------------
   // GET /api/content: Retrieve latest portfolio data from Supabase Cloud
@@ -51,13 +61,17 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     if (supabaseUrl && supabaseKey) {
       try {
-        const resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content?id=eq.main&select=*`, {
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            'Cache-Control': 'no-cache',
+        const resp = await fetchWithTimeout(
+          `${supabaseUrl}/rest/v1/portfolio_content?id=eq.main&select=*`,
+          {
+            headers: {
+              apikey: supabaseKey,
+              Authorization: `Bearer ${supabaseKey}`,
+              'Cache-Control': 'no-cache',
+            },
           },
-        });
+          4500
+        );
 
         if (resp.ok) {
           const rows = await resp.json();
@@ -94,36 +108,20 @@ export default async function handler(req, res) {
         }
       } catch (err) {
         console.error('Failed to read from Supabase:', err);
+        const isDnsOrTimeout =
+          err.name === 'AbortError' ||
+          err.code === 'ENOTFOUND' ||
+          (err.message && err.message.includes('fetch failed'));
+
         return res.status(200).json({
           success: false,
           isCloud: false,
-          error: `Supabase connection error: ${err.message}`,
+          error: isDnsOrTimeout ? 'SUPABASE_PAUSED_OR_UNREACHABLE' : `Supabase connection error: ${err.message}`,
+          message: isDnsOrTimeout
+            ? 'Supabase database appears paused or unreachable. Please visit supabase.com/dashboard and unpause/restore your project.'
+            : err.message,
           content: null,
         });
-      }
-    }
-
-    // Try Vercel KV fallback
-    if (kvUrl && kvToken) {
-      try {
-        const resp = await fetch(`${kvUrl}/get/shaik_portfolio_content`, {
-          headers: { Authorization: `Bearer ${kvToken}` },
-        });
-        if (resp.ok) {
-          const json = await resp.json();
-          if (json && json.result) {
-            const content = typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
-            return res.status(200).json({
-              success: true,
-              isCustom: true,
-              isCloud: true,
-              provider: 'vercel-kv',
-              content,
-            });
-          }
-        }
-      } catch (err) {
-        console.error('Failed to read from Cloud KV:', err);
       }
     }
 
@@ -166,48 +164,60 @@ export default async function handler(req, res) {
         };
 
         // Strategy 1: PostgREST Upsert on id
-        let resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content?on_conflict=id`, {
-          method: 'POST',
-          headers: {
-            ...headers,
-            Prefer: 'resolution=merge-duplicates,return=representation',
-          },
-          body: JSON.stringify({
-            id: 'main',
-            content: body,
-            updated_at: nowIso,
-          }),
-        });
-
-        // Strategy 2: If upsert failed, try PATCH on id=eq.main
-        if (!resp.ok) {
-          resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content?id=eq.main`, {
-            method: 'PATCH',
-            headers: {
-              ...headers,
-              Prefer: 'return=representation',
-            },
-            body: JSON.stringify({
-              content: body,
-              updated_at: nowIso,
-            }),
-          });
-        }
-
-        // Strategy 3: Simple POST insert if row doesn't exist
-        if (!resp.ok) {
-          resp = await fetch(`${supabaseUrl}/rest/v1/portfolio_content`, {
+        let resp = await fetchWithTimeout(
+          `${supabaseUrl}/rest/v1/portfolio_content?on_conflict=id`,
+          {
             method: 'POST',
             headers: {
               ...headers,
-              Prefer: 'return=representation',
+              Prefer: 'resolution=merge-duplicates,return=representation',
             },
             body: JSON.stringify({
               id: 'main',
               content: body,
               updated_at: nowIso,
             }),
-          });
+          },
+          5000
+        );
+
+        // Strategy 2: If upsert failed, try PATCH on id=eq.main
+        if (!resp.ok) {
+          resp = await fetchWithTimeout(
+            `${supabaseUrl}/rest/v1/portfolio_content?id=eq.main`,
+            {
+              method: 'PATCH',
+              headers: {
+                ...headers,
+                Prefer: 'return=representation',
+              },
+              body: JSON.stringify({
+                content: body,
+                updated_at: nowIso,
+              }),
+            },
+            5000
+          );
+        }
+
+        // Strategy 3: Simple POST insert if row doesn't exist
+        if (!resp.ok) {
+          resp = await fetchWithTimeout(
+            `${supabaseUrl}/rest/v1/portfolio_content`,
+            {
+              method: 'POST',
+              headers: {
+                ...headers,
+                Prefer: 'return=representation',
+              },
+              body: JSON.stringify({
+                id: 'main',
+                content: body,
+                updated_at: nowIso,
+              }),
+            },
+            5000
+          );
         }
 
         if (resp.ok) {
@@ -232,37 +242,7 @@ export default async function handler(req, res) {
         return res.status(500).json({
           success: false,
           isCloud: false,
-          error: `Supabase connection error: ${err.message}`,
-        });
-      }
-    }
-
-    // Save to Vercel KV fallback
-    if (kvUrl && kvToken) {
-      try {
-        const payloadString = JSON.stringify(body);
-        const resp = await fetch(`${kvUrl}/set/shaik_portfolio_content`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${kvToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payloadString),
-        });
-
-        if (resp.ok) {
-          return res.status(200).json({
-            success: true,
-            isCloud: true,
-            provider: 'vercel-kv',
-            message: 'Portfolio successfully saved to Vercel KV! Mobile and Laptop will stay in sync.',
-          });
-        }
-      } catch (err) {
-        return res.status(500).json({
-          success: false,
-          isCloud: false,
-          error: 'Cloud KV connection error: ' + err.message,
+          error: `Supabase database is currently unreachable (${err.message}). If your Supabase project was paused due to inactivity, visit supabase.com/dashboard to restore it.`,
         });
       }
     }
