@@ -7,7 +7,7 @@ import { Edit3, Check, X, RotateCcw, Layers } from 'lucide-react';
 const COLOR_OPTIONS = [
   { label: 'Azure Blue', value: 'text-azure', bgClass: 'bg-azure' },
   { label: 'Malachite Green', value: 'text-malachite', bgClass: 'bg-malachite' },
-  { label: 'Coral Red', value: 'text-coral', bgClass: 'bg-coral' },
+  { label: 'Radiant Gold', value: 'text-coral', bgClass: 'bg-coral' },
   { label: 'Happy Orange', value: 'text-happy-orange', bgClass: 'bg-happy-orange' },
 ];
 

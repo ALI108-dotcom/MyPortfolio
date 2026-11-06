@@ -1300,7 +1300,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                             >
                               <option value="text-azure">Azure Blue</option>
                               <option value="text-malachite">Malachite Green</option>
-                              <option value="text-coral">Coral Red</option>
+                              <option value="text-coral">Radiant Gold</option>
                               <option value="text-happy-orange">Happy Orange</option>
                             </select>
                           </div>

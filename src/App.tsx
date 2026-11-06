@@ -84,29 +84,29 @@ const PortfolioLayout: React.FC = () => {
     <div className="seva-landing relative isolate flex min-h-screen flex-col bg-background text-foreground overflow-x-hidden w-full">
       {/* 
         ========================================================================
-        FUTURISTIC 3D METALLIC RED & BLUE FLUID BACKGROUND (Reference Artwork)
-        High-performance, fixed depth canvas with electric cyan reflections
+        FUTURISTIC 3D METALLIC GOLD & BLUE FLUID BACKGROUND
+        High-performance, fixed depth canvas with radiant gold & cyan refractions
         ========================================================================
       */}
       <div 
         className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden select-none" 
         aria-hidden="true"
       >
-        {/* Layer 1: Metallic 3D Liquid Ribbon Visual Identity from Reference */}
+        {/* Layer 1: Metallic 3D Liquid Ribbon Visual Identity with Gold Hue Shift */}
         <img
           src={bgMetallicFlow}
           alt=""
-          className="w-full h-full object-cover object-center scale-105 opacity-40 mix-blend-screen filter contrast-125 brightness-95"
+          className="w-full h-full object-cover object-center scale-105 opacity-40 mix-blend-screen filter contrast-125 brightness-95 hue-rotate-[45deg]"
         />
 
-        {/* Layer 2: Ambient cinematic specular glows (Crimson Red + Electric Cyan + Amber Highlights) */}
+        {/* Layer 2: Ambient cinematic specular glows (Radiant Gold + Electric Cyan) */}
         <div 
           className="absolute inset-0"
           style={{
             backgroundImage: `
-              radial-gradient(ellipse 65% 55% at 15% 15%, rgba(225, 29, 72, 0.22) 0%, transparent 70%),
+              radial-gradient(ellipse 65% 55% at 15% 15%, rgba(245, 158, 11, 0.28) 0%, transparent 70%),
               radial-gradient(ellipse 55% 65% at 85% 35%, rgba(0, 240, 255, 0.18) 0%, transparent 68%),
-              radial-gradient(ellipse 70% 60% at 50% 90%, rgba(255, 0, 85, 0.15) 0%, transparent 75%)
+              radial-gradient(ellipse 70% 60% at 50% 90%, rgba(251, 191, 36, 0.20) 0%, transparent 75%)
             `
           }}
         />

@@ -11,7 +11,7 @@ const pillarBorderOptions = [
   { label: 'Green', value: 'border-neon-green hover:border-malachite' },
   { label: 'Orange', value: 'border-happy-orange hover:border-coral' },
   { label: 'Blue', value: 'border-azure hover:border-foreground' },
-  { label: 'Coral', value: 'border-coral hover:border-happy-orange' },
+  { label: 'Gold', value: 'border-coral hover:border-happy-orange' },
   { label: 'Purple', value: 'border-purple-400 hover:border-purple-300' },
 ];
 
