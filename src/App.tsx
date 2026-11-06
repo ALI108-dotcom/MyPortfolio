@@ -19,6 +19,7 @@ import { EditToolbar } from './components/EditToolbar';
 import { CmsDashboardModal } from './components/CmsDashboardModal';
 import { LearningJourney } from './components/LearningJourney';
 import { CertificationsAchievements } from './components/CertificationsAchievements';
+import bgMetallicFlow from './assets/bg-metallic-flow.jpg';
 
 const PortfolioLayout: React.FC = () => {
   const { isEditMode } = usePortfolio();
@@ -81,6 +82,41 @@ const PortfolioLayout: React.FC = () => {
 
   return (
     <div className="seva-landing relative isolate flex min-h-screen flex-col bg-background text-foreground overflow-x-hidden w-full">
+      {/* 
+        ========================================================================
+        FUTURISTIC 3D METALLIC RED & BLUE FLUID BACKGROUND (Reference Artwork)
+        High-performance, fixed depth canvas with electric cyan reflections
+        ========================================================================
+      */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden select-none" 
+        aria-hidden="true"
+      >
+        {/* Layer 1: Metallic 3D Liquid Ribbon Visual Identity from Reference */}
+        <img
+          src={bgMetallicFlow}
+          alt=""
+          className="w-full h-full object-cover object-center scale-105 opacity-40 mix-blend-screen filter contrast-125 brightness-95"
+        />
+
+        {/* Layer 2: Ambient cinematic specular glows (Crimson Red + Electric Cyan + Amber Highlights) */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              radial-gradient(ellipse 65% 55% at 15% 15%, rgba(225, 29, 72, 0.22) 0%, transparent 70%),
+              radial-gradient(ellipse 55% 65% at 85% 35%, rgba(0, 240, 255, 0.18) 0%, transparent 68%),
+              radial-gradient(ellipse 70% 60% at 50% 90%, rgba(255, 0, 85, 0.15) 0%, transparent 75%)
+            `
+          }}
+        />
+
+        {/* Layer 3: Contrast preservation vignette ensuring high readability across all sections */}
+        <div 
+          className="absolute inset-0 bg-gradient-to-b from-[#050206]/75 via-[#050206]/45 to-[#050206]/85"
+        />
+      </div>
+
       {/* Authenticated Edit Mode Admin Toolbar - STRICTLY visible only when isEditMode === true */}
       {isEditMode && <EditToolbar onOpenQuickEdit={() => setEditorModalOpen(true)} />}
 

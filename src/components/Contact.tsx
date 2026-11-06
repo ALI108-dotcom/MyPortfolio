@@ -94,7 +94,7 @@ export const Contact: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="scroll-mt-20 border-t border-border bg-background py-16 sm:py-20 lg:py-28">
+    <section id="contact" className="scroll-mt-20 border-t border-border bg-background/80 backdrop-blur-sm py-16 sm:py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         
         {/* Section Header */}

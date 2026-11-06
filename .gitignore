@@ -24,3 +24,5 @@ Thumbs.db
 # Build assets (keep portable-portfolio.html if tracked)
 dist/assets/
 dist/index.html
+dist/*.jpg
+dist/*.png
