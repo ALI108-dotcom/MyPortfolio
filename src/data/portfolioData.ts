@@ -40,9 +40,9 @@ export const personalProfile: PersonalProfile = {
   githubUrl: 'https://github.com/ALI108-dotcom',
   emailConfigurable: 'SHAIKALIBHAI9895@GMAIL.COM',
   linkedinConfigurable: 'https://www.linkedin.com/in/shaik-ali-ahammad-b6b38b321/',
-  introVideoUrl: 'https://www.youtube.com/watch?v=xC-c7E5PK0Y', // Sample 3-minute introduction video (3-13 min range)
+  introVideoUrl: 'https://www.youtube.com/watch?v=xC-c7E5PK0Y', // Sample introduction video (30 sec – 30 min range)
   introVideoTitle: 'Introduction & Technical Learning Journey',
-  introVideoDuration: '3 min',
+  introVideoDuration: '3 min (30s–30m allowed)',
   heroSkills: defaultHeroSkills,
 };
 

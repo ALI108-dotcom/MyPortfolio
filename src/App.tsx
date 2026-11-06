@@ -122,17 +122,17 @@ const PortfolioLayout: React.FC = () => {
 
       {/* Mobile Floating Admin Bar: strictly when authenticated on mobile */}
       {isEditMode && (
-        <aside className="fixed bottom-4 inset-x-4 z-40 lg:hidden flex items-center justify-between gap-2 rounded-xl bg-foreground/95 text-white p-2.5 shadow-2xl border border-happy-orange/50 backdrop-blur-md animate-in slide-in-from-bottom duration-300">
+        <aside className="fixed bottom-4 inset-x-4 z-40 lg:hidden flex items-center justify-between gap-2 rounded-xl bg-white text-black p-2.5 shadow-2xl border border-happy-orange/50 backdrop-blur-md animate-in slide-in-from-bottom duration-300">
           <div className="flex items-center gap-2 pl-2">
             <span className="h-2 w-2 rounded-full bg-happy-orange animate-ping" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-happy-orange">Admin Active</span>
+            <span className="text-[11px] font-black uppercase tracking-wider text-black">Admin Active</span>
           </div>
           <button
             onClick={() => setEditorModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg grad-ink px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow cursor-pointer"
+            className="flex items-center gap-1.5 rounded-lg bg-happy-orange px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-black shadow cursor-pointer hover:bg-happy-orange/90"
           >
-            <LayoutDashboard className="h-3.5 w-3.5 text-azure" />
-            <span>Open CMS</span>
+            <LayoutDashboard className="h-3.5 w-3.5 text-black" />
+            <span className="text-black font-black">Open CMS</span>
           </button>
         </aside>
       )}

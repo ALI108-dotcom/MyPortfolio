@@ -2107,7 +2107,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                           </p>
                         </div>
                         <span className="rounded bg-happy-orange/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-happy-orange border border-happy-orange/30 w-fit">
-                          Allowed: 3 to 13 Minutes
+                          Allowed: 30 Sec to 30 Minutes
                         </span>
                       </div>
 
@@ -2233,7 +2233,7 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
                               onClick={() => updateProfile({
                                 introVideoUrl: 'https://www.youtube.com/watch?v=xC-c7E5PK0Y',
                                 introVideoTitle: 'Introduction & Technical Learning Journey',
-                                introVideoDuration: '3 Min (3–13 Min Allowed)'
+                                introVideoDuration: '3 Min (30 Sec – 30 Min Allowed)'
                               })}
                               className="rounded-full bg-muted/60 hover:bg-muted text-foreground text-[10px] font-bold px-3 py-1 border border-border transition-colors cursor-pointer"
                             >
@@ -2290,11 +2290,11 @@ export const CmsDashboardModal: React.FC<CmsDashboardModalProps> = ({ isOpen, on
 
                         <div>
                           <label className="block text-xs font-bold uppercase text-foreground mb-1">
-                            Duration Badge (Min 3m, Max 13m)
+                            Duration Badge (30 Sec – 30 Min Allowed)
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. ~3 min (3–13 min allowed)"
+                            placeholder="e.g. ~3 min (30 sec – 30 min allowed)"
                             value={content.profile.introVideoDuration || ''}
                             onChange={(e) => updateProfile({ introVideoDuration: e.target.value })}
                             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure"

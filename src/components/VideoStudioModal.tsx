@@ -39,7 +39,7 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, init
     profile.introVideoTitle || 'Introduction & Technical Learning Journey'
   );
   const [videoDuration, setVideoDuration] = useState<string>(
-    profile.introVideoDuration || '~3 Min (3–13 Min Allowed)'
+    profile.introVideoDuration || '~3 Min (30 Sec – 30 Min Allowed)'
   );
 
   // Local file state
@@ -78,7 +78,7 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, init
       }
       setUrlInput(profile.introVideoUrl || '');
       setVideoTitle(profile.introVideoTitle || 'Introduction & Technical Learning Journey');
-      setVideoDuration(profile.introVideoDuration || '~3 Min (3–13 Min Allowed)');
+      setVideoDuration(profile.introVideoDuration || '~3 Min (30 Sec – 30 Min Allowed)');
       setSaveSuccess(null);
     } else {
       // Clean up camera stream if modal is closed
@@ -210,7 +210,14 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, init
       setRecordingSeconds(0);
 
       timerIntervalRef.current = setInterval(() => {
-        setRecordingSeconds((prev) => prev + 1);
+        setRecordingSeconds((prev) => {
+          const next = prev + 1;
+          if (next >= 1800) {
+            // Max 30 minutes limit
+            stopRecording();
+          }
+          return next;
+        });
       }, 1000);
     } catch (e: any) {
       console.error('MediaRecorder start failed:', e);
@@ -256,6 +263,24 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, init
     }
     const preview = URL.createObjectURL(file);
     setLocalVideoPreviewUrl(preview);
+
+    // Inspect duration of selected video (supports 30s to 30min range)
+    try {
+      const tempVideo = document.createElement('video');
+      tempVideo.preload = 'metadata';
+      tempVideo.onloadedmetadata = () => {
+        const durationSecs = Math.round(tempVideo.duration);
+        if (!isNaN(durationSecs) && durationSecs > 0) {
+          const mins = Math.floor(durationSecs / 60);
+          const secs = durationSecs % 60;
+          const formatted = mins > 0 ? `${mins}m ${secs > 0 ? `${secs}s` : ''}`.trim() : `${secs}s`;
+          setVideoDuration(`${formatted} (30s–30m Allowed)`);
+        }
+      };
+      tempVideo.src = preview;
+    } catch {
+      // Fallback
+    }
 
     // Auto-fill video title if empty
     if (!videoTitle || videoTitle === 'Introduction & Technical Learning Journey') {
@@ -565,7 +590,7 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, init
                   onClick={() => {
                     setUrlInput('https://www.youtube.com/watch?v=xC-c7E5PK0Y');
                     setVideoTitle('Introduction & Technical Learning Journey');
-                    setVideoDuration('3 Min (3–13 Min Allowed)');
+                    setVideoDuration('3 Min (30 Sec – 30 Min Allowed)');
                   }}
                   className="rounded-full bg-muted/60 hover:bg-muted text-foreground text-[10px] font-bold px-3 py-1 border border-border/80 transition-colors cursor-pointer"
                 >
@@ -881,7 +906,7 @@ export const VideoStudioModal: React.FC<VideoStudioModalProps> = ({ isOpen, init
                 type="text"
                 value={videoDuration}
                 onChange={(e) => setVideoDuration(e.target.value)}
-                placeholder="e.g. ~3 Min (3–13 Min Allowed)"
+                placeholder="e.g. ~3 Min (30 Sec – 30 Min Allowed)"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure"
               />
             </div>

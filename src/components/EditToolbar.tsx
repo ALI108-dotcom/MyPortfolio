@@ -58,7 +58,7 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onOpenQuickEdit }) => 
   return (
     <>
       {/* Floating Top Edit Mode Bar */}
-      <aside aria-label="Portfolio Edit Mode Controls" className="sticky top-0 z-50 w-full border-b border-happy-orange/40 bg-foreground text-white shadow-xl animate-in slide-in-from-top duration-300">
+      <aside aria-label="Portfolio Edit Mode Controls" className="sticky top-0 z-50 w-full border-b border-happy-orange/40 bg-white text-black shadow-xl animate-in slide-in-from-top duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
           
           {/* Left: Edit Mode Status Indicator */}
@@ -68,15 +68,15 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onOpenQuickEdit }) => 
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-happy-orange" />
             </span>
             <div className="flex items-center gap-2">
-              <span className="font-display text-xs uppercase tracking-wider text-happy-orange">
+              <span className="font-display text-xs uppercase tracking-wider text-black font-black">
                 PORTFOLIO EDIT MODE
               </span>
               {hasUnsavedChanges ? (
-                <span className="rounded bg-coral/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-coral border border-coral/40">
+                <span className="rounded bg-happy-orange/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-black border border-happy-orange/40">
                   Unsaved Changes
                 </span>
               ) : (
-                <span className="hidden sm:inline-block rounded bg-malachite/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-malachite border border-malachite/30">
+                <span className="hidden sm:inline-block rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-900 border border-emerald-300">
                   Synced
                 </span>
               )}
@@ -88,12 +88,12 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onOpenQuickEdit }) => 
             <div
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] sm:text-xs font-bold uppercase tracking-wider ${
                 feedback.type === 'success'
-                  ? 'bg-malachite/20 text-malachite border border-malachite/30'
-                  : 'bg-destructive/20 text-destructive-foreground border border-destructive/40'
+                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                  : 'bg-red-100 text-red-900 border border-red-300'
               }`}
             >
-              {feedback.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> : <AlertCircle className="h-3.5 w-3.5 shrink-0" />}
-              <span className="truncate max-w-[180px] sm:max-w-none">{feedback.message}</span>
+              {feedback.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-900" /> : <AlertCircle className="h-3.5 w-3.5 shrink-0 text-red-900" />}
+              <span className="truncate max-w-[180px] sm:max-w-none font-bold text-black">{feedback.message}</span>
             </div>
           )}
 
@@ -102,11 +102,11 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onOpenQuickEdit }) => 
             {onOpenQuickEdit && (
               <button
                 onClick={onOpenQuickEdit}
-                className="inline-flex items-center gap-1.5 rounded bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white transition-colors cursor-pointer border border-white/20"
+                className="inline-flex items-center gap-1.5 rounded bg-black/5 hover:bg-black/10 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-black transition-colors cursor-pointer border border-black/25 shadow-sm"
                 title="Open Dynamic Content Management System Dashboard"
               >
-                <LayoutDashboard className="h-3.5 w-3.5 text-happy-orange" />
-                <span>CMS Dashboard</span>
+                <LayoutDashboard className="h-3.5 w-3.5 text-black" />
+                <span className="text-black font-bold">CMS Dashboard</span>
               </button>
             )}
 
@@ -114,25 +114,25 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onOpenQuickEdit }) => 
               <button
                 onClick={() => setShowConfirmCancel(true)}
                 disabled={saving}
-                className="inline-flex items-center gap-1.5 rounded border border-white/20 hover:bg-white/10 px-2.5 sm:px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white/80 transition-colors cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded border border-black/25 hover:bg-black/10 px-2.5 sm:px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-black transition-colors cursor-pointer disabled:opacity-50"
                 title="Discard unsaved changes"
               >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Discard</span>
+                <RotateCcw className="h-3.5 w-3.5 text-black" />
+                <span className="hidden sm:inline text-black">Discard</span>
               </button>
             )}
 
             <button
               onClick={handleSave}
               disabled={saving}
-              className={`inline-flex items-center gap-1.5 rounded px-3 sm:px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-foreground grand-shadow transition-all cursor-pointer disabled:opacity-50 ${
+              className={`inline-flex items-center gap-1.5 rounded px-3 sm:px-4 py-1.5 text-xs font-black uppercase tracking-wider text-black grand-shadow transition-all cursor-pointer disabled:opacity-50 ${
                 hasUnsavedChanges
-                  ? 'grad-sunrise text-foreground font-black hover:scale-105'
-                  : 'bg-white/90 text-foreground hover:bg-white'
+                  ? 'bg-happy-orange text-black hover:bg-happy-orange/90 hover:scale-105'
+                  : 'bg-black/10 text-black hover:bg-black/20'
               }`}
             >
-              <Save className="h-3.5 w-3.5" />
-              <span>{saving ? 'Saving...' : 'Save Changes'}</span>
+              <Save className="h-3.5 w-3.5 text-black" />
+              <span className="text-black font-black">{saving ? 'Saving...' : 'Save Changes'}</span>
             </button>
 
             <button
@@ -143,11 +143,11 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onOpenQuickEdit }) => 
                   handleConfirmExit();
                 }
               }}
-              className="inline-flex items-center gap-1.5 rounded border border-white/20 hover:bg-white/10 px-2.5 sm:px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white/70 hover:text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded border border-black/25 hover:bg-black/10 px-2.5 sm:px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-black hover:text-black transition-colors cursor-pointer"
               title="Exit Edit Mode"
             >
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Exit</span>
+              <LogOut className="h-3.5 w-3.5 text-black" />
+              <span className="hidden sm:inline text-black">Exit</span>
             </button>
           </div>
 

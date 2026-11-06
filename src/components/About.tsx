@@ -277,9 +277,9 @@ export const About: React.FC = () => {
                     ? 'bg-happy-orange text-foreground font-black shadow-sm'
                     : 'bg-white/10 text-white/70 hover:bg-white/20'
                 }`}
-                title="Watch introduction video (3 to 13 minutes)"
+                title="Watch introduction video (30 seconds to 30 minutes)"
               >
-                ▶ Video (3 Min)
+                ▶ Video (30s–30m)
               </button>
               <button
                 onClick={() => setActiveMediaTab('philosophy')}
@@ -312,7 +312,7 @@ export const About: React.FC = () => {
                 ) : (
                   <iframe
                     src={videoInfo.embedUrl}
-                    title={profile.introVideoTitle || 'Shaik Ali Ahammad — Introduction Video (3 to 13 min)'}
+                    title={profile.introVideoTitle || 'Shaik Ali Ahammad — Introduction Video (30 sec to 30 min)'}
                     className="w-full h-full border-0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
@@ -348,7 +348,7 @@ export const About: React.FC = () => {
                   {profile.introVideoTitle || 'Introduction to Data Science & Analytical Journey'}
                 </span>
                 <span className="shrink-0 text-happy-orange font-bold text-[10px] uppercase ml-2">
-                  {profile.introVideoDuration || '~3 Min'} (3–13 Min Allowed)
+                  {profile.introVideoDuration || '~3 Min'} (30 Sec – 30 Min Allowed)
                 </span>
               </div>
             </div>
