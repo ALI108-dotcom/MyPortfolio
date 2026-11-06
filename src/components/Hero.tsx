@@ -83,7 +83,7 @@ export const Hero: React.FC = () => {
         <div className="relative lg:col-span-5">
           <div className="grad-sunrise absolute -inset-3 rounded-2xl opacity-70 blur-[3px] sm:-inset-4" aria-hidden="true" />
           
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl grand-shadow-lg sm:aspect-[3/4] lg:aspect-[4/5] bg-foreground border border-border/20 group">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-xl grand-shadow-lg sm:aspect-[3/4] lg:aspect-[4/5] bg-card border border-border/20 group">
             <img 
               src={profile.photoUrl || profilePhoto} 
               alt={`${profile.name} — What I Know & What I Did`} 
@@ -95,7 +95,7 @@ export const Hero: React.FC = () => {
             {isEditMode && (
               <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
                 <label 
-                  className="cursor-pointer flex items-center gap-1.5 rounded-full bg-foreground/90 hover:bg-foreground backdrop-blur-md px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white border border-happy-orange/60 shadow-lg transition-transform hover:scale-105 active:scale-95"
+                  className="cursor-pointer flex items-center gap-1.5 rounded-full bg-black/80 hover:bg-black backdrop-blur-md px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white border border-happy-orange/60 shadow-lg transition-transform hover:scale-105 active:scale-95"
                   title="Click to open File Explorer and choose a new profile photo"
                 >
                   <Camera className="h-3.5 w-3.5 text-happy-orange" />
@@ -110,7 +110,7 @@ export const Hero: React.FC = () => {
                 {profile.photoUrl && (
                   <button
                     onClick={() => updateProfile({ photoUrl: '' })}
-                    className="cursor-pointer flex items-center gap-1 rounded-full bg-foreground/80 hover:bg-foreground px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/80 hover:text-coral border border-white/20 shadow-md"
+                    className="cursor-pointer flex items-center gap-1 rounded-full bg-black/70 hover:bg-black px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/80 hover:text-coral border border-white/20 shadow-md"
                     title="Reset to default original photo"
                   >
                     Reset
@@ -119,20 +119,17 @@ export const Hero: React.FC = () => {
               </div>
             )}
             
-            {/* Cinematic dark gradient overlay at bottom matching reference */}
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/25 to-transparent" aria-hidden="true" />
-
-            {/* Profile badge overlay at bottom of photo */}
-            <div className="absolute bottom-0 inset-x-0 p-5 sm:p-6 text-white">
+            {/* Clean dark gradient at bottom for text contrast - NO white haze */}
+            <div className="absolute bottom-0 inset-x-0 p-5 sm:p-6 text-white bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-12">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/15 backdrop-blur-md text-white font-display text-base border border-white/20 grand-shadow">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-black/60 backdrop-blur-md text-white font-display text-base border border-white/20 grand-shadow">
                   {nameParts.map(p => p[0]).join('').slice(0, 2).toUpperCase() || 'SA'}
                 </div>
                 <div>
-                  <h3 className="font-display text-base sm:text-lg uppercase tracking-wide text-white">
+                  <h3 className="font-display text-base sm:text-lg uppercase tracking-wide text-white drop-shadow">
                     {profile.name}
                   </h3>
-                  <p className="text-xs text-white/80 font-medium">
+                  <p className="text-xs text-white/90 font-medium drop-shadow-sm">
                     {profile.roleTitle} · {profile.degreeShort}
                   </p>
                 </div>
