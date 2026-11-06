@@ -5,38 +5,39 @@
 @tailwind utilities;
 
 :root {
-  --background: #fafbfe;
-  --foreground: #141432;
-  --card: #ffffff;
-  --card-foreground: #141432;
-  --primary: #ff9f43;
-  --primary-foreground: #fafafa;
-  --secondary: #092c4c;
-  --secondary-foreground: #ffffff;
-  --muted: #f5f5f5;
-  --muted-foreground: #6c7893;
-  --border: #e2e8f0;
-  --azure: #3676d1;
-  --malachite: #03c03c;
-  --neon-green: #42de5c;
-  --happy-orange: #ffae41;
-  --coral: #ff8439;
-  --sand: #fff4e5;
+  /* Option 1: Deep Midnight Cyber Theme */
+  --background: #080c14;
+  --foreground: #f8fafc;
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+  --primary: #f59e0b;
+  --primary-foreground: #080c14;
+  --secondary: #131f37;
+  --secondary-foreground: #f8fafc;
+  --muted: #1a2336;
+  --muted-foreground: #94a3b8;
+  --border: #1e293b;
+  --azure: #38bdf8;
+  --malachite: #10b981;
+  --neon-green: #34d399;
+  --happy-orange: #f59e0b;
+  --coral: #fb7185;
+  --sand: #111927;
   --saffron: var(--happy-orange);
   --india-green: var(--malachite);
   --chakra: var(--azure);
 
-  /* Exact Gradients from reference */
-  --gradient-tiranga: linear-gradient(90deg, #ffae41 0%, #ffae41 33.33%, #ffffff 33.33%, #ffffff 66.66%, #03c03c 66.66%, #03c03c 100%);
-  --gradient-paper: linear-gradient(180deg, #fafbfe 0%, #fff4e5 100%);
-  --gradient-sunrise: linear-gradient(135deg, #ffae41 0%, #ff8439 100%);
-  --gradient-verdant: linear-gradient(135deg, #42de5c 0%, #03c03c 100%);
-  --gradient-azure: linear-gradient(135deg, #3676d1 0%, #174ea6 100%);
-  --gradient-ink: linear-gradient(140deg, #141432 0%, #1e2640 55%, #092c4c 100%);
-  --gradient-surface: linear-gradient(150deg, #ffffff 0%, #fdfbf7 100%);
-  --gradient-tricolour: linear-gradient(90deg, #ffae41 0%, #ff8439 35%, #03c03c 70%, #3676d1 100%);
-  --gradient-paper-soft: linear-gradient(160deg, #fafbfe 0%, #f8faff 60%, #fff7ee 100%);
-  --gradient-headline: linear-gradient(100deg, #141432 0%, #2962c4 48%, #03a834 95%);
+  /* Deep Midnight Cyber Gradients */
+  --gradient-tiranga: linear-gradient(90deg, #f59e0b 0%, #f59e0b 33.33%, #ffffff 33.33%, #ffffff 66.66%, #10b981 66.66%, #10b981 100%);
+  --gradient-paper: linear-gradient(180deg, #080c14 0%, #0d1527 100%);
+  --gradient-sunrise: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  --gradient-verdant: linear-gradient(135deg, #059669 0%, #047857 100%);
+  --gradient-azure: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  --gradient-ink: linear-gradient(140deg, #0b111e 0%, #111a2e 55%, #18243c 100%);
+  --gradient-surface: linear-gradient(150deg, #0f172a 0%, #131c31 100%);
+  --gradient-tricolour: linear-gradient(90deg, #f59e0b 0%, #fb7185 35%, #10b981 70%, #38bdf8 100%);
+  --gradient-paper-soft: linear-gradient(160deg, #080c14 0%, #0b111e 60%, #10192d 100%);
+  --gradient-headline: linear-gradient(100deg, #ffffff 0%, #38bdf8 48%, #34d399 95%);
 }
 
 body {
@@ -60,29 +61,29 @@ body {
 
 .civic-grid {
   background-image: 
-    linear-gradient(to right, rgba(54, 118, 209, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(54, 118, 209, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
   background-size: 36px 36px;
 }
 
 .print-dots {
-  background-image: radial-gradient(circle, rgba(20, 20, 50, 0.15) 1px, transparent 1.5px);
+  background-image: radial-gradient(circle, rgba(56, 189, 248, 0.12) 1px, transparent 1.5px);
   background-size: 9px 9px;
 }
 
 .brand-glow {
   background-image: 
-    radial-gradient(60% 70% at 12% 0%, rgba(255, 174, 65, 0.22) 0%, transparent 70%),
-    radial-gradient(55% 65% at 92% 12%, rgba(54, 118, 209, 0.2) 0%, transparent 72%),
-    radial-gradient(70% 80% at 50% 110%, rgba(3, 192, 60, 0.18) 0%, transparent 75%);
+    radial-gradient(60% 70% at 12% 0%, rgba(245, 158, 11, 0.14) 0%, transparent 70%),
+    radial-gradient(55% 65% at 92% 12%, rgba(56, 189, 248, 0.16) 0%, transparent 72%),
+    radial-gradient(70% 80% at 50% 110%, rgba(16, 185, 129, 0.12) 0%, transparent 75%);
 }
 
 .grand-shadow {
-  box-shadow: 0 1px 0 rgba(20, 20, 50, 0.08), 0 18px 40px -28px rgba(54, 118, 209, 0.45), 0 36px 80px -60px rgba(20, 20, 50, 0.45);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.06);
 }
 
 .grand-shadow-lg {
-  box-shadow: 0 2px 0 rgba(20, 20, 50, 0.1), 0 28px 60px -34px rgba(54, 118, 209, 0.5), 0 60px 120px -70px rgba(20, 20, 50, 0.55);
+  box-shadow: 0 12px 35px -4px rgba(0, 0, 0, 0.85), 0 0 1px 1px rgba(255, 255, 255, 0.08);
 }
 
 .lift-on-hover {
@@ -107,7 +108,7 @@ body {
 
 .grad-ink {
   background-image: var(--gradient-ink);
-  color: #fafbfe;
+  color: #f8fafc;
 }
 
 .grad-surface {
@@ -116,12 +117,12 @@ body {
 
 .grad-sunrise {
   background-image: var(--gradient-sunrise);
-  color: #141432;
+  color: #ffffff;
 }
 
 .grad-verdant {
   background-image: var(--gradient-verdant);
-  color: #141432;
+  color: #ffffff;
 }
 
 .grad-azure {
